@@ -16,6 +16,7 @@
         "lorisleiva/laravel-actions": "^2.8",
         "propaganistas/laravel-phone": "^6.0",
         "spatie/laravel-model-status": "^1.20",
+        "spatie/laravel-schemaless-attributes": "^2.6",
         "whitecube/php-prices": "^3.1"
     },
     "require-dev": {
