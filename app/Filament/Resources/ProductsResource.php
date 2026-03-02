@@ -60,6 +60,14 @@ class ProductsResource extends Resource
                         Forms\Components\TextInput::make('key_location'),
                         Forms\Components\TextInput::make('digital_assets'),
                         Forms\Components\Toggle::make('phased_out'),
+                        Forms\Components\Livewire::make(
+                            'nested-comments::comments',
+                            fn (?Model $record) => [
+                                'record' => $record,
+                            ]
+                        )->hiddenOn('create')
+                            ->key(fn (?Model $record) => 'comments-' . $record?->getKey())
+                            ->columnSpanFull(),
                     ])
             ]);
     }

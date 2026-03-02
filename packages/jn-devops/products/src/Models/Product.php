@@ -2,6 +2,8 @@
 
 namespace Homeful\Products\Models;
 
+use Coolsam\NestedComments\Concerns\HasComments;
+use Coolsam\NestedComments\Concerns\HasReactions;
 use Homeful\Common\Traits\HasPackageFactory as HasFactory;
 use Spatie\SchemalessAttributes\SchemalessAttributes;
 use Homeful\Products\Traits\HasAdditionalAttributes;
@@ -66,7 +68,8 @@ class Product extends Model implements ProductInterface
     use HasAdditionalAttributes;
     use HasFactory;
     use HasMeta;
-
+    use HasComments;
+    use HasReactions;
     protected $fillable = [
         'sku',
         'name',
