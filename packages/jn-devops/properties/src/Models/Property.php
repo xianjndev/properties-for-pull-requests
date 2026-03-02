@@ -2,6 +2,8 @@
 
 namespace Homeful\Properties\Models;
 
+use Coolsam\NestedComments\Concerns\HasComments;
+use Coolsam\NestedComments\Concerns\HasReactions;
 use Homeful\Properties\Traits\HasAdditionalPropertyAttributes;
 use Homeful\Common\Traits\HasPackageFactory as HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -51,7 +53,8 @@ class Property extends Model
     use HasAdditionalPropertyAttributes;
     use HasFactory;
     use HasMeta;
-
+    use HasComments;
+    use HasReactions;
     protected $fillable = [
         'code',
         'name',
