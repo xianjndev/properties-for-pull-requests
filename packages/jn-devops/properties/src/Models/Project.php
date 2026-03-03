@@ -36,11 +36,16 @@ use Homeful\Common\Traits\HasMeta;
  *
  * @method int getKey()
  */
+
+ use Coolsam\NestedComments\Concerns\HasComments;
+ use Coolsam\NestedComments\Concerns\HasReactions;
 class Project extends Model
 {
     use HasAdditionalProjectAttributes;
     use HasFactory;
     use HasMeta;
+    use HasComments;
+    use HasReactions;
 
     protected $fillable = [
         'code',

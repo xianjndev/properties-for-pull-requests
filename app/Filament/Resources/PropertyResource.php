@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Homeful\Properties\Models\Property;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\HtmlString;
 
@@ -126,8 +127,13 @@ class PropertyResource extends Resource
                             ->content(fn ($record) => $record?->created_at?->diffForHumans() ?? new HtmlString('&mdash;'))
 
                     ])->columnSpan(1),
-                Forms\Components\Livewire::make('update-logs-table')
-                    ->key(fn ($get, $record) => 'update-logs-' . $record->getKey())
+                Forms\Components\Livewire::make(
+                    'nested-comments::comments',
+                    fn (?Model $record) => [
+                        'record' => $record,
+                    ]
+                )->hiddenOn('create')
+                    ->key(fn (?Model $record) => 'comments-' . $record?->getKey())
                     ->columnSpanFull(),
             ])->columns(3);
     }
