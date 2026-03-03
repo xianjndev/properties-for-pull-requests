@@ -2,6 +2,7 @@
 
 namespace Homeful\Properties\Models;
 
+use App\Models\UpdateLog;
 use Homeful\Properties\Traits\HasAdditionalPropertyAttributes;
 use Homeful\Common\Traits\HasPackageFactory as HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -88,5 +89,10 @@ class Property extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'project_code', 'code', 'projects');
+    }
+
+    public function updateLogs(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(UpdateLog::class, 'loggable');
     }
 }

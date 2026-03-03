@@ -100,6 +100,9 @@ class ProjectsResource extends Resource
                     ->required(),
                 Textarea::make('project_description')
                     ->columnSpanFull(),
+                Forms\Components\Livewire::make('update-logs-table')
+                    ->key(fn ($get, $record) => 'update-logs-' . $record->getKey())
+                    ->columnSpanFull(),
             ]);
     }
 

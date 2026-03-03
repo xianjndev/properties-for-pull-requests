@@ -126,7 +126,9 @@ class PropertyResource extends Resource
                             ->content(fn ($record) => $record?->created_at?->diffForHumans() ?? new HtmlString('&mdash;'))
 
                     ])->columnSpan(1),
-
+                Forms\Components\Livewire::make('update-logs-table')
+                    ->key(fn ($get, $record) => 'update-logs-' . $record->getKey())
+                    ->columnSpanFull(),
             ])->columns(3);
     }
 

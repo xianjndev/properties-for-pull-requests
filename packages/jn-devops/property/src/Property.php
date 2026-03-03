@@ -129,4 +129,6 @@ class Property implements ProductInterface
     {
         return $this->appraisal;
     }
+
+
 }

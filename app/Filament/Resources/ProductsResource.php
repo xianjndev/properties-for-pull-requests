@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductsResource\Pages;
-use App\Filament\Resources\ProductsResource\RelationManagers;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -60,7 +59,10 @@ class ProductsResource extends Resource
                         Forms\Components\TextInput::make('key_location'),
                         Forms\Components\TextInput::make('digital_assets'),
                         Forms\Components\Toggle::make('phased_out'),
-                    ])
+                    ]),
+                Forms\Components\Livewire::make('update-logs-table')
+                    ->key(fn ($get, $record) => 'update-logs-' . $record->getKey())
+                    ->columnSpanFull(),
             ]);
     }
 
