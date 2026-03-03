@@ -2,6 +2,7 @@
 
 namespace Homeful\Properties\Models;
 
+use App\Models\UpdateLog;
 use Coolsam\NestedComments\Concerns\HasComments;
 use Coolsam\NestedComments\Concerns\HasReactions;
 use Homeful\Properties\Traits\HasAdditionalPropertyAttributes;
@@ -91,5 +92,10 @@ class Property extends Model
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'project_code', 'code', 'projects');
+    }
+
+    public function updateLogs(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(UpdateLog::class, 'loggable');
     }
 }

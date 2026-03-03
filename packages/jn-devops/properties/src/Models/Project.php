@@ -2,6 +2,7 @@
 
 namespace Homeful\Properties\Models;
 
+use App\Models\UpdateLog;
 use Carbon\Carbon;
 use Homeful\Properties\Traits\HasAdditionalProjectAttributes;
 use Homeful\Common\Traits\HasPackageFactory as HasFactory;
@@ -82,4 +83,10 @@ class Project extends Model
             ? $table
             : parent::getTable();
     }
+
+    public function updateLogs(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(UpdateLog::class, 'loggable');
+    }
+
 }

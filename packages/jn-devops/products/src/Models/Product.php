@@ -2,6 +2,7 @@
 
 namespace Homeful\Products\Models;
 
+use App\Models\UpdateLog;
 use Coolsam\NestedComments\Concerns\HasComments;
 use Coolsam\NestedComments\Concerns\HasReactions;
 use Homeful\Common\Traits\HasPackageFactory as HasFactory;
@@ -136,5 +137,10 @@ class Product extends Model implements ProductInterface
     public function getPercentMiscellaneousFees(): float
     {
         return $this->percent_miscellaneous_fees;
+    }
+
+    public function updateLogs(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(UpdateLog::class, 'loggable');
     }
 }
