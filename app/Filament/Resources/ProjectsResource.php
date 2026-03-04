@@ -99,6 +99,14 @@ class ProjectsResource extends Resource
                     ->numeric()
                     ->required(),
                 Textarea::make('project_description')
+                ->columnSpanFull(),
+                Forms\Components\Livewire::make(
+                    'nested-comments::comments',
+                    fn (?Model $record) => [
+                        'record' => $record,
+                    ]
+                )->hiddenOn('create')
+                    ->key(fn (?Model $record) => 'comments-' . $record?->getKey())
                     ->columnSpanFull(),
                 Forms\Components\Livewire::make('update-logs-table')
                     ->key(fn ($get, $record) => 'update-logs-' . $record->getKey())
