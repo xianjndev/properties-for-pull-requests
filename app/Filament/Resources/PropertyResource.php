@@ -3,8 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PropertyResource\Pages;
+use App\Models\PropertyStatusLog;
 use App\Models\Status;
 use Filament\Forms;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
@@ -134,6 +136,9 @@ class PropertyResource extends Resource
                     ]
                 )->hiddenOn('create')
                     ->key(fn (?Model $record) => 'comments-' . $record?->getKey())
+                    ->columnSpanFull(),
+                Forms\Components\Livewire::make('status-log-table')
+                    ->key(fn ($get, $record) => 'status-logs-' . $record->getKey())
                     ->columnSpanFull(),
             ])->columns(3);
     }
@@ -491,11 +496,25 @@ class PropertyResource extends Resource
                                 Status::pluck('description','code')
                             )
                             ->searchable()
-                            ->required()
+                            ->required(),
+                        TextArea::make('remarks')
+                            ->label('Remarks')
+                            ->cols(10)
+                            ->rows(5)
+                            ->maxLength(255),
                     ])
                     ->action(function ($record, array $data){
+
                         $record->update([
                             'status'=>$data['status']
+                        ]);
+
+                        PropertyStatusLog::created([
+                            'property_code'=>$record->code,
+                            'status_code'=>$data['status'],
+                            'status_description'=>Status::where('code',$data['status'])->first()->description??'',
+                            'user_id'=>auth()->id(),
+                            'remarks'=>$data['remarks'],
                         ]);
                         $record->save();
                     })
