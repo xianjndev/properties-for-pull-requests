@@ -140,6 +140,9 @@ class PropertyResource extends Resource
                 Forms\Components\Livewire::make('status-log-table')
                     ->key(fn ($get, $record) => 'status-logs-' . $record->getKey())
                     ->columnSpanFull(),
+                Forms\Components\Livewire::make('update-logs-table')
+                    ->key(fn ($get, $record) => 'update-logs-' . $record->getKey())
+                    ->columnSpanFull(),
             ])->columns(3);
     }
 
