@@ -3,8 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PropertyResource\Pages;
+use App\Models\PropertyStatusLog;
 use App\Models\Status;
 use Filament\Forms;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\MaxWidth;
@@ -12,6 +14,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Homeful\Properties\Models\Property;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\HtmlString;
 
@@ -458,11 +461,25 @@ class PropertyResource extends Resource
                                 Status::pluck('description','code')
                             )
                             ->searchable()
-                            ->required()
+                            ->required(),
+                        TextArea::make('remarks')
+                            ->label('Remarks')
+                            ->cols(10)
+                            ->rows(5)
+                            ->maxLength(255),
                     ])
                     ->action(function ($record, array $data){
+
                         $record->update([
                             'status'=>$data['status']
+                        ]);
+
+                        PropertyStatusLog::created([
+                            'property_code'=>$record->code,
+                            'status_code'=>$data['status'],
+                            'status_description'=>Status::where('code',$data['status'])->first()->description??'',
+                            'user_id'=>auth()->id(),
+                            'remarks'=>$data['remarks'],
                         ]);
                         $record->save();
                     })

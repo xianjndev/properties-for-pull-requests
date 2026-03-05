@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+
+class UpdateLog extends Model
+{
+    protected $fillable = [
+        'user_id',
+        'field',
+        'from',
+        'to',
+        'description',
+    ];
+
+    public function loggable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+}

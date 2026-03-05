@@ -52,4 +52,11 @@ class ManageProjects extends ManageRecords
                 ->importer(ProjectsImporter::class)
         ];
     }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            \Coolsam\NestedComments\Filament\Widgets\CommentsWidget::class,
+        ];
+    }
 }
