@@ -3,9 +3,9 @@
 namespace App\Observers;
 
 use App\Models\ContactsUpdateLogs;
+use App\Models\Property;
 use App\Models\UpdateLog;
 use Homeful\Contacts\Models\Contact;
-use Homeful\Properties\Models\Property;
 
 class PropertyObserver
 {
