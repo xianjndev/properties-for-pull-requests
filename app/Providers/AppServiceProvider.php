@@ -2,11 +2,13 @@
 
 namespace App\Providers;
 
+use App\Models\Product;
+use App\Models\Project;
+use App\Models\Property;
 use App\Models\User;
 use App\Observers\ProductObserver;
+use App\Observers\ProjectObserver;
 use App\Observers\PropertyObserver;
-use Homeful\Products\Models\Product;
-use Homeful\Properties\Models\Property;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -26,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Product::observe(ProductObserver::class);
-        Product::observe(ProductObserver::class);
+        Project::observe(ProjectObserver::class);
         Property::observe(PropertyObserver::class);
         //
         Gate::define('viewPulse', function (User $user) {

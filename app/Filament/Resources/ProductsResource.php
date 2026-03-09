@@ -51,9 +51,6 @@ class ProductsResource extends Resource
                         Forms\Components\Textarea::make('description')
                                             ->required()
                                             ->columnSpanFull(),
-                        Forms\Components\Livewire::make('update-logs-table')
-                            ->key(fn ($get, $record) => 'update-logs-' . $record->getKey())
-                            ->columnSpanFull(),
                     ])
                     ->columns(12),
                 Forms\Components\Section::make()
@@ -144,6 +141,17 @@ class ProductsResource extends Resource
                                             ->columnSpan(4),
                     ])
                     ->columns(12),
+                    Forms\Components\Livewire::make(
+                        'nested-comments::comments',
+                        fn (?Model $record) => [
+                            'record' => $record,
+                        ]
+                    )->hiddenOn('create')
+                        ->key(fn (?Model $record) => 'comments-' . $record?->getKey())
+                        ->columnSpanFull(),
+                    Forms\Components\Livewire::make('update-logs-table')
+                        ->key(fn ($get, $record) => 'update-logs-' . $record->getKey())
+                        ->columnSpanFull(),
             ]);
     }
 
