@@ -134,9 +134,23 @@ class PropertyResource extends Resource
                         Forms\Components\Placeholder::make('updated_at')
                             ->content(fn ($record) => $record?->created_at?->diffForHumans() ?? new HtmlString('&mdash;'))
 
-                    ])->columnSpan(2),
+                    ])->columnSpan(1),
+                Forms\Components\Livewire::make(
+                        'nested-comments::comments',
+                        fn (?Model $record) => [
+                            'record' => $record,
+                        ]
+                    )->hiddenOn('create')
+                    ->key(fn (?Model $record) => 'comments-' . $record?->getKey())
+                    ->columnSpanFull(),
+                Forms\Components\Livewire::make('status-log-table')
+                    ->key(fn ($get, $record) => 'status-logs-' . $record->getKey())
+                    ->columnSpanFull(),
+                Forms\Components\Livewire::make('update-logs-table')
+                    ->key(fn ($get, $record) => 'update-logs-' . $record->getKey())
+                    ->columnSpanFull(),
+            ])->columns(3);
 
-            ])->columns(12);
     }
 
     public static function table(Table $table): Table

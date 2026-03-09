@@ -51,6 +51,9 @@ class ProductsResource extends Resource
                         Forms\Components\Textarea::make('description')
                                             ->required()
                                             ->columnSpanFull(),
+                        Forms\Components\Livewire::make('update-logs-table')
+                            ->key(fn ($get, $record) => 'update-logs-' . $record->getKey())
+                            ->columnSpanFull(),
                     ])
                     ->columns(12),
                 Forms\Components\Section::make()
