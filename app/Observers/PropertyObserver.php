@@ -6,6 +6,8 @@ use App\Models\ContactsUpdateLogs;
 use App\Models\Property;
 use App\Models\UpdateLog;
 use Homeful\Contacts\Models\Contact;
+use Illuminate\Database\Eloquent\Collection;
+use Spatie\SchemalessAttributes\SchemalessAttributes;
 
 class PropertyObserver
 {
@@ -141,11 +143,18 @@ class PropertyObserver
      */
     private function normalizeToArray($value)
     {
-        if (is_string($value)) {
+         // If it's a string, try to decode JSON
+         if (is_string($value)) {
             $decoded = json_decode($value, true);
             return $decoded !== null ? $decoded : $value;
         }
 
+        // If it's a Collection, convert to array
+        if ($value instanceof SchemalessAttributes || $value instanceof Collection) {
+            return $value->toArray();
+        }
+
+        // Otherwise, just return as-is
         return $value;
     }
 }

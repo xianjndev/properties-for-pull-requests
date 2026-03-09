@@ -3,6 +3,8 @@
 namespace App\Observers;
 
 use App\Models\Project;
+use Illuminate\Database\Eloquent\Collection;
+use Spatie\SchemalessAttributes\SchemalessAttributes;
 
 class ProjectObserver
 {
@@ -23,7 +25,6 @@ class ProjectObserver
         // Decode JSON to array if necessary
         $originalValue = $this->normalizeToArray($originalValue);
         $newValue = $this->normalizeToArray($newValue);
-
 
         // If values are arrays, flatten them to find and log specific changes
         if (is_array($originalValue) && is_array($newValue)) {
@@ -95,11 +96,18 @@ class ProjectObserver
      */
     private function normalizeToArray($value)
     {
+         // If it's a string, try to decode JSON
         if (is_string($value)) {
             $decoded = json_decode($value, true);
             return $decoded !== null ? $decoded : $value;
         }
 
+        // If it's a Collection, convert to array
+        if ($value instanceof SchemalessAttributes || $value instanceof Collection) {
+            return $value->toArray();
+        }
+
+        // Otherwise, just return as-is
         return $value;
     }
 }
