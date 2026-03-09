@@ -3,7 +3,6 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductsResource\Pages;
-use App\Filament\Resources\ProductsResource\RelationManagers;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -67,6 +66,9 @@ class ProductsResource extends Resource
                             ]
                         )->hiddenOn('create')
                             ->key(fn (?Model $record) => 'comments-' . $record?->getKey())
+                            ->columnSpanFull(),
+                        Forms\Components\Livewire::make('update-logs-table')
+                            ->key(fn ($get, $record) => 'update-logs-' . $record->getKey())
                             ->columnSpanFull(),
                     ])
             ]);
