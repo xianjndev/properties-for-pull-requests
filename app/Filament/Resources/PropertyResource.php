@@ -58,37 +58,33 @@ class PropertyResource extends Resource
                             ->columnSpan(2)
                             ->label('Cluster')
                             ->required(),
-                        Forms\Components\TextInput::make('status')
-                            ->columnSpan(3)
-                            ->label('Status')
-                            ->required(),
                             
                         Forms\Components\TextInput::make('tcp')
                             ->columnSpan(4)
                             ->numeric()
                             ->required(),
                         Forms\Components\TextInput::make('unit_type_interior')
-                            ->columnSpan(2)
+                            ->columnSpan(3)
                             ->required(),
                         Forms\Components\TextInput::make('phase')
-                            ->columnSpan(2)
+                            ->columnSpan(3)
                             ->required(),
                         Forms\Components\TextInput::make('block')
-                            ->columnSpan(2)
+                            ->columnSpan(3)
                             ->required(),
                         Forms\Components\TextInput::make('lot')
-                            ->columnSpan(2)
+                            ->columnSpan(3)
                             ->required(),
                         Forms\Components\TextInput::make('floor_area')
-                            ->columnSpan(2)
+                            ->columnSpan(3)
                             ->numeric()
                             ->required(),
                         Forms\Components\TextInput::make('lot_area')
-                            ->columnSpan(2)
+                            ->columnSpan(3)
                             ->numeric()
                             ->required(),
                         Forms\Components\TextInput::make('unit_type')
-                            ->columnSpan(4)
+                            ->columnSpan(5)
                             ->required(),
                         Forms\Components\TextInput::make('project_code')
                             ->columnSpan(4)
@@ -104,19 +100,19 @@ class PropertyResource extends Resource
                             ->numeric()
                             ->required(),
                         Forms\Components\TextInput::make('toilets_and_bathrooms')
-                            ->columnSpan(2)
+                            ->columnSpan(3)
                             ->numeric() 
                             ->required(),
                         Forms\Components\TextInput::make('parking_slots')
-                            ->columnSpan(2)
+                            ->columnSpan(3)
                             ->numeric()
                             ->required(),
                         Forms\Components\TextInput::make('carports')
-                            ->columnSpan(2)
+                            ->columnSpan(3)
                             ->numeric()
                             ->required(),
-                        Forms\Components\TextInput::make('project_description')
-                            ->columnSpan(10)
+                        Forms\Components\Textarea::make('project_description')
+                            ->columnSpanFull()
                             ->required(),
                         Forms\Components\Textarea::make('digital_assets')
                             ->columnSpanFull()
@@ -487,7 +483,7 @@ class PropertyResource extends Resource
                             'status'=>$data['status']
                         ]);
 
-                        PropertyStatusLog::created([
+                        PropertyStatusLog::create([
                             'property_code'=>$record->code,
                             'status_code'=>$data['status'],
                             'status_description'=>Status::where('code',$data['status'])->first()->description??'',
