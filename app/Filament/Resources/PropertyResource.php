@@ -38,7 +38,6 @@ class PropertyResource extends Resource
 
                         Forms\Components\TextInput::make('sku')
                             ->columnSpan(3)
-                            ->unique(ignoreRecord: true)
                             ->required()
                             ->maxLength(255),
                         Forms\Components\TextInput::make('name')
@@ -134,7 +133,7 @@ class PropertyResource extends Resource
                         Forms\Components\Placeholder::make('updated_at')
                             ->content(fn ($record) => $record?->created_at?->diffForHumans() ?? new HtmlString('&mdash;'))
 
-                    ])->columnSpan(1),
+                    ])->columnSpan(2),
                 Forms\Components\Livewire::make(
                         'nested-comments::comments',
                         fn (?Model $record) => [
@@ -149,7 +148,7 @@ class PropertyResource extends Resource
                 Forms\Components\Livewire::make('update-logs-table')
                     ->key(fn ($get, $record) => 'update-logs-' . $record->getKey())
                     ->columnSpanFull(),
-            ])->columns(3);
+            ])->columns(12);
 
     }
 
