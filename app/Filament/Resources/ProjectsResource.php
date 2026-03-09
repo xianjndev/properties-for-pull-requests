@@ -18,7 +18,7 @@ use Homeful\Property\Enums\HousingType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Homeful\Properties\Models\Project;
+use App\Models\Project;
 use Illuminate\Support\Carbon;
 
 class ProjectsResource extends Resource
