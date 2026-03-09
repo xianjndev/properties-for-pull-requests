@@ -2,7 +2,7 @@
 
 namespace App\Observers;
 
-use Homeful\Properties\Models\Project;
+use App\Models\Project;
 
 class ProjectObserver
 {
