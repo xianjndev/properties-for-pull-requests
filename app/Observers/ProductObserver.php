@@ -2,8 +2,7 @@
 
 namespace App\Observers;
 
-
-use Homeful\Products\Models\Product;
+use App\Models\Product;
 
 class ProductObserver
 {
