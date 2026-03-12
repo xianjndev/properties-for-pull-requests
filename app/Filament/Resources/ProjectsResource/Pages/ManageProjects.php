@@ -49,6 +49,7 @@ class ManageProjects extends ManageRecords
                     return $project;
                 }),
             Actions\ImportAction::make()
+                ->hidden(auth()->user()?->cannot('import_projects'))
                 ->importer(ProjectsImporter::class)
         ];
     }

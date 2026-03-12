@@ -147,5 +147,9 @@ class ProductPolicy
     {
         return $user->can('reorder_products');
     }
+    public function import(User $user): bool
+    {
+        return $user->can('import_products');
+    }
 
 }

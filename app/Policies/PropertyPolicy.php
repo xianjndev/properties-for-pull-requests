@@ -148,4 +148,18 @@ class PropertyPolicy
         return $user->can('reorder_property');
     }
 
+    public function import(User $user): bool
+    {
+        return $user->can('import_property');
+    }
+    public function export(User $user): bool
+    {
+        return $user->can('export_property');
+    }
+
+    public function updateStatus(User $user): bool
+    {
+        return $user->can('update_status_property');
+    }
+
 }

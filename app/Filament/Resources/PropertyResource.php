@@ -13,12 +13,13 @@ use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Table;
 use App\Models\Property;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\HtmlString;
 
-class PropertyResource extends Resource
+class PropertyResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Property::class;
 
@@ -27,6 +28,27 @@ class PropertyResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
+    }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+            'import',
+            'export',
+            'update_status',
+        ];
     }
 
     public static function form(Form $form): Form
@@ -462,6 +484,7 @@ class PropertyResource extends Resource
                 // Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\Action::make('update_status')
+                    ->hidden(auth()->user()->cannot('update_status_property'))
                     ->label('Update Status')
                     ->form([
                         Forms\Components\Select::make('status')

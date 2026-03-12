@@ -15,7 +15,7 @@ use Filament\Tables\Columns\ToggleColumn;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-class ProductsResource extends Resource
+class ProductsResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Product::class;
 
@@ -24,6 +24,26 @@ class ProductsResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
+    }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+            'import',
+            'export',
+        ];
     }
 
     public static function form(Form $form): Form

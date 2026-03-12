@@ -50,8 +50,10 @@ class ManageProperties extends ManageRecords
                     return $property;
                 }),
             Actions\ImportAction::make()
+                ->hidden(auth()->user()?->cannot('import_property'))
                 ->importer(PropertyImporter::class),
             Actions\ExportAction::make()
+                ->hidden(auth()->user()?->cannot('export_property'))
                 ->exporter(PropertyExporter::class),
         ];
     }
