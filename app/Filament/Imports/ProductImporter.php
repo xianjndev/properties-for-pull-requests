@@ -18,6 +18,9 @@ class ProductImporter extends Importer
             ImportColumn::make('project_code'),
             ImportColumn::make('name'),
             ImportColumn::make('brand'),
+            ImportColumn::make('hdmf'),
+            ImportColumn::make('bank'),
+            ImportColumn::make('preferred_option'),
             ImportColumn::make('category'),
             ImportColumn::make('description'),
             ImportColumn::make('price')
@@ -62,6 +65,9 @@ class ProductImporter extends Importer
                 'name' => (string) ($this->data['name'] ?? ''),
                 'brand' => (string) ($this->data['brand'] ?? ''),
                 'category' => (string) ($this->data['category'] ?? ''),
+                'bank' => (bool) ($this->data['bank'] ?? false),
+                'hdmf' => (bool) ($this->data['hdmf'] ?? false),
+                'preferred_option' => (string) ($this->data['preferred_option'] ?? ''),
                 'description' => (string) ($this->data['description'] ?? ''),
                 'price' => (float) ($this->data['price'] ?? 0),
                 'directions' => (string) ($this->data['directions'] ?? ''),
@@ -74,6 +80,9 @@ class ProductImporter extends Importer
         $product->directions= $this->data['directions'] ?? '';
         $product->name= $this->data['name'] ?? '';
         $product->brand= $this->data['brand'] ?? '';
+        $product->bank= $this->data['bank'] ?? false;
+        $product->hdmf= $this->data['hdmf'] ?? false;
+        $product->preferred_option= $this->data['preferred_option'] ?? '';
         $product->category= $this->data['category'] ?? '';
         $product->description= $this->data['description'] ?? '';
         $product->destinations= $this->data['destinations'] ?? '';
@@ -116,6 +125,9 @@ class ProductImporter extends Importer
                 'name' => (string) ($this->data['name'] ?? ''),
                 'brand' => (string) ($this->data['brand'] ?? ''),
                 'category' => (string) ($this->data['category'] ?? ''),
+                'bank' => (bool) ($this->data['bank'] ?? false),
+                'hdmf' => (bool) ($this->data['hdmf'] ?? false),
+                'preferred_option' => (string) ($this->data['preferred_option'] ?? ''),
                 'description' => (string) ($this->data['description'] ?? ''),
                 'price' => (float) ($this->data['tcp'] ?? 0),
                 'location' => (string) ($this->data['location'] ?? ''),
@@ -129,6 +141,9 @@ class ProductImporter extends Importer
         $this->record->directions= $this->data['directions'] ?? '';
         $this->record->name= $this->data['name'] ?? '';
         $this->record->brand= $this->data['brand'] ?? '';
+        $this->record->bank= $this->data['bank'] ?? false;
+        $this->record->hdmf= $this->data['hdmf'] ?? false;
+        $this->record->preferred_option= $this->data['preferred_option'] ?? '';
         $this->record->category= $this->data['category'] ?? '';
         $this->record->description= $this->data['description'] ?? '';
         $this->record->destinations= $this->data['destinations'] ?? '';
