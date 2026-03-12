@@ -11,10 +11,12 @@ use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use App\Models\Product;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Filament\Tables\Columns\ToggleColumn;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-class ProductsResource extends Resource
+class ProductsResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Product::class;
 
@@ -23,6 +25,26 @@ class ProductsResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
+    }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+            'import',
+            'export',
+        ];
     }
 
     public static function form(Form $form): Form
@@ -43,11 +65,23 @@ class ProductsResource extends Resource
                                             ->columnSpan(4),
                         Forms\Components\TextInput::make('category')
                                             ->required()
-                                            ->columnSpan(4),
+                                            ->columnSpan(3),
                         Forms\Components\TextInput::make('price')
                                             ->numeric()
                                             ->required()
+                                            ->columnSpan(2),
+                        Forms\Components\Select::make('preferred_option')
+                                            ->options([
+                                                'bank' => 'Bank',
+                                                'hdmf' => 'HDMF',
+                                            ])
+                                            ->native(false)
+                                            ->required()
                                             ->columnSpan(3),
+                        Forms\Components\Toggle::make('bank')
+                                            ->columnSpan(2),
+                        Forms\Components\Toggle::make('hdmf')
+                                            ->columnSpan(2),
                         Forms\Components\Textarea::make('description')
                                             ->required()
                                             ->columnSpanFull(),
@@ -159,7 +193,7 @@ class ProductsResource extends Resource
     {
         return $table
             ->defaultSort('created_at','desc')
-            ->defaultPaginationPageOption(50)
+            ->defaultPaginationPageOption(20)
             ->columns([
                 TextColumn::make('sku')
                     ->searchable()
@@ -176,6 +210,18 @@ class ProductsResource extends Resource
                 TextColumn::make('brand')
                     ->searchable()
                     ->label('Brand'),
+                ToggleColumn::make('hdmf')
+                    ->label('HDMF'),
+                ToggleColumn::make('bank')
+                    ->label('Bank'),
+                TextColumn::make('preferred_option')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'bank' => 'warning',
+                        'hdmf' => 'success',
+                    })
+                    ->searchable()
+                    ->label('Preferred Option'),
                 TextColumn::make('category')
                     ->searchable()
                     ->label('Category'),

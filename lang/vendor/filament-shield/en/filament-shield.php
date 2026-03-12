@@ -79,5 +79,9 @@ return [
         'reorder' => 'Reorder',
         'restore_any' => 'Restore Any',
         'replicate' => 'Replicate',
+        'import' => 'Import',
+        'export' => 'Export',
+        'update_status' => 'Status Update',
     ],
 ];
+ 
