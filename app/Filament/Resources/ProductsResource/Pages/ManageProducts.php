@@ -51,8 +51,10 @@ class ManageProducts extends ManageRecords
                     return $model;
                 }),
             Actions\ImportAction::make()
+                ->hidden(auth()->user()?->cannot('import_products'))
                 ->importer(ProductImporter::class),
             Actions\ExportAction::make()
+                ->hidden(auth()->user()?->cannot('export_products'))
                 ->exporter(ProductExporter::class),
         ];
     }

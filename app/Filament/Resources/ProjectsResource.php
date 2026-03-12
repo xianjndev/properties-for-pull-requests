@@ -19,9 +19,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Models\Project;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Illuminate\Support\Carbon;
 
-class ProjectsResource extends Resource
+class ProjectsResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Project::class;
 
@@ -30,6 +31,25 @@ class ProjectsResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         return static::getModel()::count();
+    }
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+            'import',
+        ];
     }
 
     public static function form(Form $form): Form

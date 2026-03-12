@@ -148,4 +148,14 @@ class ProjectPolicy
         return $user->can('reorder_projects');
     }
 
+    public function import(User $user): bool
+    {
+        return $user->can('import_projects');
+    }
+
+    public function export(User $user): bool
+    {
+        return $user->can('export_projects');
+    }
+
 }
