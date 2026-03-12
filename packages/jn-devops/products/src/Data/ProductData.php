@@ -37,6 +37,9 @@ class ProductData extends Data
         public string $status_code,
         public string $key_location,
         public ?bool $phased_out,
+        public ?bool $bank,
+        public ?bool $hdmf,
+        public ?string $preferred_option,
         // Interface fields
         public float $appraised_value,
         public float $percent_down_payment,
@@ -84,6 +87,9 @@ class ProductData extends Data
             status_code: $product->status_code,
             key_location: $product->key_location,
             phased_out: $product->phased_out,
+            bank: $product->bank,
+            hdmf: $product->hdmf,
+            preferred_option: $product->preferred_option,
             // Interface fields
             appraised_value: $product->appraised_value->inclusive()->getAmount()->toFloat(),
             percent_down_payment: $product->percent_down_payment,
