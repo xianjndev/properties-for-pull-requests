@@ -20,6 +20,7 @@ class Product extends ModelsProduct
         'hdmf',
         'bank',
         'preferred_option',
+        'reservation_fee',
     ];
 
     protected $casts = [

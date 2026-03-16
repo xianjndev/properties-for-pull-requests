@@ -48,6 +48,14 @@ class ProductsResource extends Resource
                         Forms\Components\TextInput::make('price')
                                             ->numeric()
                                             ->required()
+                                            ->columnSpan(3),
+                        Forms\Components\TextInput::make('reservation_fee')
+                                            ->numeric()
+                                            ->required()
+                                            ->columnSpan(2),
+                        Forms\Components\Toggle::make('bank')
+                                            ->columnSpan(2),
+                        Forms\Components\Toggle::make('hdmf')
                                             ->columnSpan(2),
                         Forms\Components\Select::make('preferred_option')
                                             ->options([
@@ -57,10 +65,6 @@ class ProductsResource extends Resource
                                             ->native(false)
                                             ->required()
                                             ->columnSpan(3),
-                        Forms\Components\Toggle::make('bank')
-                                            ->columnSpan(2),
-                        Forms\Components\Toggle::make('hdmf')
-                                            ->columnSpan(2),
                         Forms\Components\Textarea::make('description')
                                             ->required()
                                             ->columnSpanFull(),
@@ -163,7 +167,8 @@ class ProductsResource extends Resource
                         ->key(fn (?Model $record) => 'comments-' . $record?->getKey())
                         ->columnSpanFull(),
                     Forms\Components\Livewire::make('update-logs-table')
-                        ->key(fn ($get, $record) => 'update-logs-' . $record->getKey())
+                        ->key(fn ($get, $record) => 'update-logs-' . $record?->getKey())
+                        ->hiddenOn('create')
                         ->columnSpanFull(),
             ]);
     }
@@ -210,6 +215,9 @@ class ProductsResource extends Resource
                 TextColumn::make('price')
                     ->searchable()
                     ->label('Price'),
+                TextColumn::make('reservation_fee')
+                    ->searchable()
+                    ->label('Reservation Fee'),
                 TextColumn::make('phased_out')
                     ->badge()
                     ->label('Phased Out')
