@@ -40,6 +40,7 @@ class ProductData extends Data
         public ?bool $bank,
         public ?bool $hdmf,
         public ?string $preferred_option,
+        public ?float $reservation_fee,
         // Interface fields
         public float $appraised_value,
         public float $percent_down_payment,
@@ -90,6 +91,7 @@ class ProductData extends Data
             bank: $product->bank,
             hdmf: $product->hdmf,
             preferred_option: $product->preferred_option,
+            reservation_fee: $product->reservation_fee,
             // Interface fields
             appraised_value: $product->appraised_value->inclusive()->getAmount()->toFloat(),
             percent_down_payment: $product->percent_down_payment,

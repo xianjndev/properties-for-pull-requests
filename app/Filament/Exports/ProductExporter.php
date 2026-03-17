@@ -40,6 +40,10 @@ class ProductExporter extends Exporter
                 ->state(function (Product $record) {
                     return $record->preferred_option;
                 }),
+            ExportColumn::make('reservation_fee')
+                ->state(function (Product $record) {
+                    return $record->reservation_fee;
+                }),
             ExportColumn::make('description')
                 ->state(function (Product $record) {
                     return $record->description;
