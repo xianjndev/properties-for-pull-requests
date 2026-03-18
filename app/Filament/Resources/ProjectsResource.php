@@ -306,7 +306,7 @@ class ProjectsResource extends Resource implements HasShieldPermissions
                             ->where('meta->exec_tin', 'like', "%{$search}%");
                     }),
                 TextColumn::make('board_resolution_date')
-                    ->getStateUsing(fn ($record) =>Carbon::parse($record->board_resolution_date)->format('Y-m-d') )
+                    ->getStateUsing(fn ($record) => $record->meta->board_resolution_date)
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query
                             ->orderBy('meta->board_resolution_date', $direction);

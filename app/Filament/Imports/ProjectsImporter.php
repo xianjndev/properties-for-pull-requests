@@ -114,10 +114,10 @@ class ProjectsImporter extends Importer
             $project->meta->set('exec_position', $this->data['exec_position']??'');
             $project->meta->set('exec_signatory', $this->data['exec_signatory']??'');
             $project->meta->set('exec_tin', $this->data['exec_tin']??'');
-            $project->board_resolution_date = !empty($this->data['board_resolution_date'])
+            $project->meta->set('board_resolution_date', !empty($this->data['board_resolution_date'])
                 ? Carbon::parse($this->data['board_resolution_date'])->format('Y-m-d')
-                : null;
-
+                : null
+            );
             $project->save();
 
 
@@ -169,9 +169,10 @@ class ProjectsImporter extends Importer
         $this->record->exec_position = $this->data['exec_position'];
         $this->record->exec_signatory = $this->data['exec_signatory'];
         $this->record->exec_tin = $this->data['exec_tin'];
-        $this->record->board_resolution_date = !empty($this->data['board_resolution_date'])
+        $this->record->meta->set('board_resolution_date', !empty($this->data['board_resolution_date'])
             ? Carbon::parse($this->data['board_resolution_date'])->format('Y-m-d')
-            : null;
+            : null
+        );
 
         $this->record->save();
     }
