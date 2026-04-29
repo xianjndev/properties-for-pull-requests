@@ -139,11 +139,13 @@ class ProjectsResource extends Resource implements HasShieldPermissions
                         'record' => $record,
                     ]
                 )->hiddenOn('create')
-                    ->key(fn (?Model $record) => 'comments-' . $record?->getKey())
+                    ->key(fn (?Model $record) => 'comments-' . now())
                     ->columnSpanFull(),
                 Forms\Components\Livewire::make('update-logs-table')
-                    ->key(fn ($get, $record) => 'update-logs-' . $record->getKey())
+                    ->hiddenOn('create')
+                    ->key(fn ($get, $record) => 'update-logs-' . now())
                     ->columnSpanFull(),
+
                 
             ])
             ->columns(12);
