@@ -100,6 +100,15 @@ class ProjectsResource extends Resource implements HasShieldPermissions
                     ->required()
                     ->numeric()
                     ->columnSpan(3),
+                Forms\Components\Select::make('lts')
+                    ->label('LTS')
+                    ->options([
+                        true => 'Yes',
+                        false => 'No',
+                    ])
+                    ->native(false)
+                    ->default(false)
+                    ->columnSpan(3),
                 TextInput::make('company_name')
                     ->required()
                     ->columnSpan(6),
@@ -329,6 +338,10 @@ class ProjectsResource extends Resource implements HasShieldPermissions
                     }),
                 TextColumn::make('total_sold')
                     ->formatStateUsing(fn ($record) => $record->meta->total_sold),
+                TextColumn::make('lts')
+                    ->label('LTS')
+                    ->getStateUsing(fn ($record) => (bool) $record->meta->get('lts'))
+                    ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No'),
                 TextColumn::make('project_description')
                     ->formatStateUsing(fn ($record) => $record->meta->project_description)
                     ->words(15),
@@ -347,6 +360,7 @@ class ProjectsResource extends Resource implements HasShieldPermissions
                         $data['appraised_lot_value'] = $record->meta->get('appraised_lot_value');
                         $data['appraised__lot_value'] = $record->meta->get('appraised__lot_value');
                         $data['total_sold'] = $record->meta->get('total_sold');
+                        $data['lts'] = (bool) $record->meta->get('lts');
                         $data['company_name'] = $record->meta->get('company_name');
                         $data['company_tin'] = $record->meta->get('company_tin');
                         $data['company_address'] = $record->meta->get('company_address');
@@ -374,6 +388,7 @@ class ProjectsResource extends Resource implements HasShieldPermissions
                         $record->meta->set('company_code', $data['company_code']);
                         $record->meta->set('appraised_lot_value', $data['appraised_lot_value']);
                         $record->meta->set('total_sold', $data['total_sold']);
+                        $record->meta->set('lts', (bool) ($data['lts'] ?? false));
                         $record->meta->set('company_name', $data['company_name']);
                         $record->meta->set('company_tin', $data['company_tin']);
                         $record->meta->set('company_address', $data['company_address']);
