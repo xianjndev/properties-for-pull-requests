@@ -28,6 +28,7 @@ class ProjectData extends Data
         public ?string $exec_signatory,
         public ?string $exec_tin,
         public ?string $board_resolution_date,
+        public bool $lts,
     ) {}
 
     public static function fromModel(Project $project): ProjectData
@@ -53,6 +54,7 @@ class ProjectData extends Data
             exec_signatory: $project->exec_signatory,
             exec_tin: $project->exec_tin,
             board_resolution_date: $project->board_resolution_date?->format('Y-m-d'),
+            lts: (bool) $project->meta->get('lts'),
         );
     }
 }

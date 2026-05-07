@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\{ApiController, GetNextPropertyDetailController, GetProductByProjectController, GetProductDetailController, GetProjectDetailController, GetPropertyDetailController};
+use App\Http\Controllers\{ApiController, GetNextPropertyDetailController, GetProductByProjectController, GetProductDetailController, GetProjectDetailController, GetPropertyDetailController, GetTechnicalDescriptionController};
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 
@@ -25,6 +25,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('projects/{project_code}', GetProjectDetailController::class)
         ->name('project-details');
+
+    Route::get('technical-descriptions/{project_code}', GetTechnicalDescriptionController::class)
+        ->name('technical-description-details');
 
     Route::get('products/by-project/{project_code}', GetProductByProjectController::class)
         ->name('product-by-project');
