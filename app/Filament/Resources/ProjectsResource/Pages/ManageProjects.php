@@ -31,6 +31,7 @@ class ManageProjects extends ManageRecords
                     $project->meta->set('company_code', $data['company_code']);
                     $project->meta->set('appraised_lot_value', $data['appraised_lot_value']);
                     $project->meta->set('total_sold', $data['total_sold']);
+                    $project->meta->set('lts', (bool) ($data['lts'] ?? false));
                     $project->meta->set('company_name', $data['company_name']);
                     $project->meta->set('company_tin', $data['company_tin']);
                     $project->meta->set('company_address', $data['company_address']);

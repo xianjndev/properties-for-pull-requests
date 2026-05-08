@@ -67,17 +67,20 @@ class ProjectsImporter extends Importer
             ImportColumn::make('appraised_lot_value')
                 ->rules(['max:255']),
             ImportColumn::make('total_sold'),
+            ImportColumn::make('lts')
+                ->label('LTS')
+                ->boolean(),
         ];
     }
 
     public function resolveRecord(): ?Project
     {
         try {
-            $project = Project::firstOrNew(
+            $project = Project::updateOrCreate(
                 [
-                    'name' => $this->data['project_name'],
                     'code'=>$this->data['project_code'],
                 ],[
+                'name' => $this->data['project_name'],
                 'location'=>$this->data['project_location'],
             ]);
             $project->meta->set('address', $this->data['project_address']??'');
@@ -105,6 +108,7 @@ class ProjectsImporter extends Importer
             $project->meta->set('appraised_lot_value',(float) $this->data['appraised_lot_value']??0);
             $project->meta->set('appraised__lot_value',(float) $this->data['appraised_lot_value']??0);
             $project->meta->set('total_sold', $this->data['total_sold']);
+            $project->meta->set('lts', (bool) ($this->data['lts'] ?? false));
 
             $project->meta->set('company_name', $this->data['company_name']??'');
             $project->meta->set('company_tin', $this->data['company_tin']??'');
@@ -122,6 +126,7 @@ class ProjectsImporter extends Importer
 
 
         } catch (\Throwable $th) {
+            throw $th;
             dd($th);
         }
 
@@ -130,11 +135,11 @@ class ProjectsImporter extends Importer
 
     public function beforeSave(): void
     {
-        $this->record = Project::firstOrNew(
+        $this->record = Project::updateOrCreate(
             [
-                'name' => $this->data['project_name'],
                 'code'=>$this->data['project_code'],
             ],[
+            'name' => $this->data['project_name'],
             'location'=>$this->data['project_location'],
         ]);
         $this->record->meta->set('address', $this->data['project_address']);
@@ -161,6 +166,7 @@ class ProjectsImporter extends Importer
         $this->record->meta->set('appraised_lot_value',(float) $this->data['appraised_lot_value']??0);
         $this->record->meta->set('appraised__lot_value',(float) $this->data['appraised_lot_value']??0);
         $this->record->meta->set('total_sold', $this->data['total_sold']);
+        $this->record->meta->set('lts', (bool) ($this->data['lts'] ?? false));
         $this->record->company_name = $this->data['company_name'];
         $this->record->company_tin = $this->data['company_tin'];
         $this->record->company_address = $this->data['company_address'];
