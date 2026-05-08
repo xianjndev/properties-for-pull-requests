@@ -135,11 +135,11 @@ class ProjectsImporter extends Importer
 
     public function beforeSave(): void
     {
-        $this->record = Project::firstOrNew(
+        $this->record = Project::updateOrCreate(
             [
-                'name' => $this->data['project_name'],
                 'code'=>$this->data['project_code'],
             ],[
+            'name' => $this->data['project_name'],
             'location'=>$this->data['project_location'],
         ]);
         $this->record->meta->set('address', $this->data['project_address']);
