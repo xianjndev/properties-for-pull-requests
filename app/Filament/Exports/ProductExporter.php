@@ -28,6 +28,22 @@ class ProductExporter extends Exporter
                 ->state(function (Product $record) {
                     return $record->category;
                 }),
+            ExportColumn::make('hdmf')
+                ->state(function (Product $record) {
+                    return $record->hdmf;
+                }),
+            ExportColumn::make('bank')
+                ->state(function (Product $record) {
+                    return $record->bank;
+                }),
+            ExportColumn::make('preferred_option')
+                ->state(function (Product $record) {
+                    return $record->preferred_option;
+                }),
+            ExportColumn::make('reservation_fee')
+                ->state(function (Product $record) {
+                    return $record->reservation_fee;
+                }),
             ExportColumn::make('description')
                 ->state(function (Product $record) {
                     return $record->description;

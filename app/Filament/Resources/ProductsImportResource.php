@@ -14,7 +14,7 @@ use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Table;
 use Homeful\Products\Models\Product;
-use Homeful\Properties\Models\Property;
+use App\Models\Property;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -152,6 +152,7 @@ class ProductsImportResource extends Resource
                             ->content(fn ($record) => $record?->created_at?->diffForHumans() ?? new HtmlString('&mdash;'))
 
                     ])->columnSpan(1),
+
 
             ])->columns(3);
     }

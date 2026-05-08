@@ -3,18 +3,20 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductsResource\Pages;
-use App\Filament\Resources\ProductsResource\RelationManagers;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Support\Enums\MaxWidth;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Homeful\Products\Models\Product;
+use App\Models\Product;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use Filament\Tables\Columns\ToggleColumn;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-class ProductsResource extends Resource
+class ProductsResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Product::class;
 
@@ -25,42 +27,170 @@ class ProductsResource extends Resource
         return static::getModel()::count();
     }
 
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+            'import',
+            'export',
+        ];
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Forms\Components\Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('sku'),
-                        Forms\Components\TextInput::make('name'),
-                        Forms\Components\TextInput::make('brand'),
-                        Forms\Components\TextInput::make('category'),
-                        Forms\Components\TextInput::make('description'),
-                        Forms\Components\TextInput::make('price'),
-                        Forms\Components\TextInput::make('destinations'),
-                        Forms\Components\TextInput::make('directions'),
-                        Forms\Components\TextInput::make('amenities'),
-                        Forms\Components\TextInput::make('facade_url'),
-                        Forms\Components\TextInput::make('lot_area'),
-                        Forms\Components\TextInput::make('floor_area'),
-                        Forms\Components\TextInput::make('property_type'),
-                        Forms\Components\TextInput::make('house_type'),
-                        Forms\Components\TextInput::make('unit_type'),
-                        Forms\Components\TextInput::make('appraised_value'),
-                        Forms\Components\TextInput::make('percent_down_payment'),
-                        Forms\Components\TextInput::make('balance_payment_term'),
-                        Forms\Components\TextInput::make('down_payment_term'),
-                        Forms\Components\TextInput::make('percent_miscellaneous_fees'),
-                        Forms\Components\TextInput::make('balance_payment_interest_rate'),
-                        Forms\Components\TextInput::make('percent_gross_monthly_income'),
-                        Forms\Components\TextInput::make('max_age'),
-                        Forms\Components\TextInput::make('mortgage_redemption_insurance_fee'),
-                        Forms\Components\TextInput::make('income_requirement_multiplier'),
-                        Forms\Components\TextInput::make('maximum_paying_age'),
-                        Forms\Components\TextInput::make('key_location'),
-                        Forms\Components\TextInput::make('digital_assets'),
-                        Forms\Components\Toggle::make('phased_out'),
+                        Forms\Components\TextInput::make('sku')
+                                            ->required()
+                                            ->unique(ignoreRecord: true)
+                                            ->columnSpan(3),
+                        Forms\Components\TextInput::make('name')
+                                            ->required()
+                                            ->columnSpan(5),
+                        Forms\Components\TextInput::make('brand')
+                                            ->required()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('category')
+                                            ->required()
+                                            ->columnSpan(3),
+                        Forms\Components\TextInput::make('price')
+                                            ->numeric()
+                                            ->required()
+                                            ->columnSpan(3),
+                        Forms\Components\TextInput::make('reservation_fee')
+                                            ->numeric()
+                                            ->required()
+                                            ->columnSpan(2),
+                        Forms\Components\Toggle::make('bank')
+                                            ->columnSpan(2),
+                        Forms\Components\Toggle::make('hdmf')
+                                            ->columnSpan(2),
+                        Forms\Components\Select::make('preferred_option')
+                                            ->options([
+                                                'bank' => 'Bank',
+                                                'hdmf' => 'HDMF',
+                                            ])
+                                            ->native(false)
+                                            ->required()
+                                            ->columnSpan(3),
+                        Forms\Components\Textarea::make('description')
+                                            ->required()
+                                            ->columnSpanFull(),
                     ])
+                    ->columns(12),
+                Forms\Components\Section::make()
+                    ->schema([
+                        Forms\Components\TextInput::make('destinations')
+                                            ->required()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('facade_url')
+                                            ->required()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('directions')
+                                            ->required()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('amenities')
+                                            ->required()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('key_location')
+                                            ->required()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('percent_down_payment')
+                                            ->required()
+                                            ->numeric()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('down_payment_term')
+                                            ->required()
+                                            ->numeric()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('percent_miscellaneous_fees')
+                                            ->required()
+                                            ->numeric()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('percent_gross_monthly_income')
+                                            ->required()
+                                            ->numeric()
+                                            ->columnSpan(4),
+                        Forms\Components\Textarea::make('digital_assets')
+                                            ->required()
+                                            ->columnSpanFull(),
+                        Forms\Components\TextInput::make('balance_payment_interest_rate')
+                                            ->required()
+                                            ->numeric()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('max_age')
+                                            ->required()
+                                            ->numeric()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('mortgage_redemption_insurance_fee')
+                                            ->required()
+                                            ->numeric()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('maximum_paying_age')
+                                            ->required()
+                                            ->numeric()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('income_requirement_multiplier')
+                                            ->required()
+                                            ->numeric()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('processing_fee')
+                                            ->required()
+                                            ->numeric()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('project_code')
+                                            ->required()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('property_type')
+                                            ->required()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('house_type')
+                                            ->required()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('unit_type')
+                                            ->required()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('balance_payment_term')
+                                            ->required()
+                                            ->numeric()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('floor_area')
+                                            ->required()
+                                            ->numeric()
+                                            ->columnSpan(4),
+                        Forms\Components\TextInput::make('lot_area')
+                                            ->required()
+                                            ->columnSpan(4),
+                        Forms\Components\Toggle::make('phased_out')
+                                            ->required()
+                                            ->columnSpan(4),
+                    ])
+                    ->columns(12),
+                    Forms\Components\Livewire::make(
+                        'nested-comments::comments',
+                        fn (?Model $record) => [
+                            'record' => $record,
+                        ]
+                    )->hiddenOn('create')
+                        ->key(fn (?Model $record) => 'comments-' . $record?->getKey())
+                        ->columnSpanFull(),
+                    Forms\Components\Livewire::make('update-logs-table')
+                        ->key(fn ($get, $record) => 'update-logs-' . $record?->getKey())
+                        ->hiddenOn('create')
+                        ->columnSpanFull(),
             ]);
     }
 
@@ -68,7 +198,7 @@ class ProductsResource extends Resource
     {
         return $table
             ->defaultSort('created_at','desc')
-            ->defaultPaginationPageOption(50)
+            ->defaultPaginationPageOption(20)
             ->columns([
                 TextColumn::make('sku')
                     ->searchable()
@@ -85,6 +215,18 @@ class ProductsResource extends Resource
                 TextColumn::make('brand')
                     ->searchable()
                     ->label('Brand'),
+                ToggleColumn::make('hdmf')
+                    ->label('HDMF'),
+                ToggleColumn::make('bank')
+                    ->label('Bank'),
+                TextColumn::make('preferred_option')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'bank' => 'warning',
+                        'hdmf' => 'success',
+                    })
+                    ->searchable()
+                    ->label('Preferred Option'),
                 TextColumn::make('category')
                     ->searchable()
                     ->label('Category'),
@@ -94,6 +236,9 @@ class ProductsResource extends Resource
                 TextColumn::make('price')
                     ->searchable()
                     ->label('Price'),
+                TextColumn::make('reservation_fee')
+                    ->searchable()
+                    ->label('Reservation Fee'),
                 TextColumn::make('phased_out')
                     ->badge()
                     ->label('Phased Out')
@@ -250,49 +395,60 @@ class ProductsResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->mutateRecordDataUsing(function (array $data ,Product $record) {
-                        $data['brand']=$record->brand;
-                        //                        $data['market_segment']=$record->product->market_segment;
                         $data['price']=$record->price->getAmount()->toFloat();
 
-                        $data['floor_area']=$record->meta->floor_area;
-                        $data['lot_area']=$record->meta->lot_area;
-                        $data['unit_type']=$record->meta->unit_type;
-                        $data['facade_url']=$record->meta->facade_url;
-
-                        $data['percent_dp']=$record->meta->percent_dp;
-                        $data['percent_mf']=$record->meta->percent_mf;
-                        $data['dp_term']=$record->meta->dp_term;
-                        $data['percent_down_payment']=$record->meta->percent_down_payment;
-                        $data['down_payment_term']=$record->meta->down_payment_term;
-                        $data['balance_payment_term']=$record->meta->balance_payment_term;
-                        $data['percent_miscellaneous_fees']=$record->meta->percent_miscellaneous_fees;
-                        $data['balance_payment_interest_rate']=$record->meta->balance_payment_interest_rate;
-
-                        $data['destinations']=$record->destinations;
-                        $data['amenities']=$record->amenities;
-                        $data['key_location']=$record->key_location;
-                        $data['digital_assets']=$record->digital_assets;
-                        $data['phased_out']=$record->phased_out;
+                        $data['destinations'] = $record->meta->destinations;
+                        $data['facade_url'] = $record->meta->facade_url;
+                        $data['directions'] = $record->meta->directions;
+                        $data['amenities'] = $record->meta->amenities;
+                        $data['key_location'] = $record->meta->key_location;
+                        $data['percent_down_payment'] = $record->meta->percent_down_payment;
+                        $data['down_payment_term'] = $record->meta->down_payment_term;
+                        $data['percent_miscellaneous_fees'] = $record->meta->percent_miscellaneous_fees;
+                        $data['digital_assets'] = $record->meta->digital_assets;
+                        $data['percent_gross_monthly_income'] = $record->meta->percent_gross_monthly_income;
+                        $data['balance_payment_interest_rate'] = $record->meta->balance_payment_interest_rate;
+                        $data['max_age'] = $record->meta->max_age;
+                        $data['mortgage_redemption_insurance_fee'] = $record->meta->mortgage_redemption_insurance_fee;
+                        $data['maximum_paying_age'] = $record->meta->maximum_paying_age;
+                        $data['income_requirement_multiplier'] = $record->meta->income_requirement_multiplier;
+                        $data['processing_fee'] = $record->meta->processing_fee;
+                        $data['project_code'] = $record->meta->project_code;
+                        $data['property_type'] = $record->meta->property_type;
+                        $data['house_type'] = $record->meta->house_type;
+                        $data['unit_type'] = $record->meta->unit_type;
+                        $data['balance_payment_term'] = $record->meta->balance_payment_term;
+                        $data['floor_area'] = $record->meta->floor_area;
+                        $data['lot_area'] = $record->meta->lot_area;
+                        $data['phased_out'] = $record->meta->phased_out;
                         return $data;
                     })
                     ->using(function (Model $record, array $data): Model {
                         $record->update($data);
-                        $record->brand = $data['brand'];
 
-                        $record->price=$data['price'];
-                        $record->category = $data['category'];
-                        $record->floor_area = $data['floor_area'];
-                        $record->lot_area = $data['lot_area'];
-                        $record->unit_type = $data['unit_type'];
-                        $record->facade_url = $data['facade_url'];
-
-                        $record->meta->set('percent_dp',$data['percent_dp']);
-                        $record->meta->set('percent_mf',$data['percent_mf']);
-                        $record->meta->set('dp_term',$data['dp_term']);
                         $record->destinations = $data['destinations'];
+                        $record->facade_url = $data['facade_url'];
+                        $record->directions = $data['directions'];
                         $record->amenities = $data['amenities'];
                         $record->key_location = $data['key_location'];
+                        $record->percent_down_payment = $data['percent_down_payment'];
+                        $record->down_payment_term = $data['down_payment_term'];
+                        $record->percent_miscellaneous_fees = $data['percent_miscellaneous_fees'];
                         $record->digital_assets = $data['digital_assets'];
+                        $record->percent_gross_monthly_income = $data['percent_gross_monthly_income'];
+                        $record->balance_payment_interest_rate = $data['balance_payment_interest_rate'];
+                        $record->max_age = $data['max_age'];
+                        $record->mortgage_redemption_insurance_fee = $data['mortgage_redemption_insurance_fee'];
+                        $record->maximum_paying_age = $data['maximum_paying_age'];
+                        $record->income_requirement_multiplier = $data['income_requirement_multiplier'];
+                        $record->processing_fee = $data['processing_fee'];
+                        $record->project_code = $data['project_code'];
+                        $record->property_type = $data['property_type'];
+                        $record->house_type = $data['house_type'];
+                        $record->unit_type = $data['unit_type'];
+                        $record->balance_payment_term = $data['balance_payment_term'];
+                        $record->floor_area = $data['floor_area'];
+                        $record->lot_area = $data['lot_area'];
                         $record->phased_out = $data['phased_out'];
 
                         $record->save();
