@@ -76,11 +76,11 @@ class ProjectsImporter extends Importer
     public function resolveRecord(): ?Project
     {
         try {
-            $project = Project::firstOrNew(
+            $project = Project::updateOrCreate(
                 [
-                    'name' => $this->data['project_name'],
                     'code'=>$this->data['project_code'],
                 ],[
+                'name' => $this->data['project_name'],
                 'location'=>$this->data['project_location'],
             ]);
             $project->meta->set('address', $this->data['project_address']??'');
@@ -126,6 +126,7 @@ class ProjectsImporter extends Importer
 
 
         } catch (\Throwable $th) {
+            throw $th;
             dd($th);
         }
 
