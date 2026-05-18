@@ -10,7 +10,7 @@ class TechnicalDescriptionResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'project_code' => $this->project_code,
+            'property_code' => $this->property_code,
             'company_name' => $this->company_name,
             'registry_of_deeds' => $this->registry_of_deeds,
             'tct' => $this->tct,

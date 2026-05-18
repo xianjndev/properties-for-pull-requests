@@ -3,7 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TechnicalDescriptionResource\Pages;
-use App\Models\Project;
+use App\Models\Property;
 use App\Models\TechnicalDescription;
 use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Filament\Forms;
@@ -49,31 +49,31 @@ class TechnicalDescriptionResource extends Resource implements HasShieldPermissi
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('project_code')
-                    ->label('Project Code')
-                    ->options(fn (): array => Project::query()
+                Forms\Components\Select::make('property_code')
+                    ->label('Property Code')
+                    ->options(fn (): array => Property::query()
                         ->orderBy('code')
                         ->get()
-                        ->filter(fn (Project $project): bool => self::isRayvanesProject($project))
-                        ->mapWithKeys(fn (Project $project): array => [$project->code => $project->code])
+                        ->filter(fn (Property $property): bool => self::isRayvanesProperty($property))
+                        ->mapWithKeys(fn (Property $property): array => [$property->code => $property->code])
                         ->toArray())
                     ->searchable()
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->rules([
                         fn () => function (string $attribute, mixed $value, \Closure $fail): void {
-                            if (! self::isRayvanesProjectCode((string) $value)) {
-                                $fail('Technical descriptions may only be created for Rayvanes Realty Corp / RRC projects.');
+                            if (! self::isRayvanesPropertyCode((string) $value)) {
+                                $fail('Technical descriptions may only be created for Rayvanes Realty Corp / RRC properties.');
                             }
                         },
                     ])
                     ->live()
                     ->afterStateUpdated(function (Forms\Set $set, ?string $state): void {
-                        $project = Project::query()
+                        $property = Property::query()
                             ->where('code', $state)
                             ->first();
 
-                        $set('company_name', self::getRayvanesCompanyName($project));
+                        $set('company_name', self::getRayvanesCompanyName($property));
                     })
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('company_name')
@@ -113,8 +113,8 @@ class TechnicalDescriptionResource extends Resource implements HasShieldPermissi
             ->defaultSort('created_at', 'desc')
             ->defaultPaginationPageOption(50)
             ->columns([
-                TextColumn::make('project_code')
-                    ->label('Project Code')
+                TextColumn::make('property_code')
+                    ->label('Property Code')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('company_name')
@@ -167,27 +167,35 @@ class TechnicalDescriptionResource extends Resource implements HasShieldPermissi
         ];
     }
 
-    public static function isRayvanesProjectCode(string $projectCode): bool
+    public static function isRayvanesPropertyCode(string $propertyCode): bool
     {
-        $project = Project::query()
-            ->where('code', $projectCode)
+        $property = Property::query()
+            ->where('code', $propertyCode)
             ->first();
+
+        if (! $property) {
+            return false;
+        }
+
+        return self::isRayvanesProperty($property);
+    }
+
+    public static function isRayvanesProperty(Property $property): bool
+    {
+        $project = $property->project;
 
         if (! $project) {
             return false;
         }
 
-        return self::isRayvanesProject($project);
-    }
-
-    public static function isRayvanesProject(Project $project): bool
-    {
         return strcasecmp(trim((string) $project->company_code), 'RRC') === 0
             || strcasecmp(trim((string) $project->company_name), 'Rayvanes Realty Corp') === 0;
     }
 
-    public static function getRayvanesCompanyName(?Project $project): ?string
+    public static function getRayvanesCompanyName(?Property $property): ?string
     {
+        $project = $property?->project;
+
         if (! $project) {
             return null;
         }

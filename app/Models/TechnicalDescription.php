@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class TechnicalDescription extends Model
 {
     protected $fillable = [
-        'project_code',
+        'property_code',
         'company_name',
         'registry_of_deeds',
         'tct',
@@ -16,8 +16,8 @@ class TechnicalDescription extends Model
         'technical_description',
     ];
 
-    public function project(): BelongsTo
+    public function property(): BelongsTo
     {
-        return $this->belongsTo(Project::class, 'project_code', 'code');
+        return $this->belongsTo(Property::class, 'property_code', 'code');
     }
 }

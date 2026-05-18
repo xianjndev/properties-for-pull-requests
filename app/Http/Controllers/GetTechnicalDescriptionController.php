@@ -8,10 +8,10 @@ use Illuminate\Http\Request;
 
 class GetTechnicalDescriptionController extends Controller
 {
-    public function __invoke(Request $request, string $project_code): \Illuminate\Http\JsonResponse
+    public function __invoke(Request $request, string $property_code): \Illuminate\Http\JsonResponse
     {
         $technicalDescription = TechnicalDescription::query()
-            ->where('project_code', $project_code)
+            ->where('property_code', $property_code)
             ->firstOrFail();
 
         return (new TechnicalDescriptionResource($technicalDescription))->response();

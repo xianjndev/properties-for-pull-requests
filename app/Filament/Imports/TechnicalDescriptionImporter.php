@@ -3,7 +3,7 @@
 namespace App\Filament\Imports;
 
 use App\Filament\Resources\TechnicalDescriptionResource;
-use App\Models\Project;
+use App\Models\Property;
 use App\Models\TechnicalDescription;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -18,18 +18,18 @@ class TechnicalDescriptionImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('project_code')
-                ->label('Project Code')
+            ImportColumn::make('property_code')
+                ->label('Property Code')
                 ->requiredMapping()
                 ->rules([
                     'required',
                     'string',
                     'max:255',
-                    Rule::exists('projects', 'code'),
-                    Rule::unique('technical_descriptions', 'project_code'),
+                    Rule::exists('properties', 'code'),
+                    Rule::unique('technical_descriptions', 'property_code'),
                     fn () => function (string $attribute, mixed $value, \Closure $fail): void {
-                        if (! TechnicalDescriptionResource::isRayvanesProjectCode((string) $value)) {
-                            $fail('Project Code must belong to Rayvanes Realty Corp / RRC.');
+                        if (! TechnicalDescriptionResource::isRayvanesPropertyCode((string) $value)) {
+                            $fail('Property Code must belong to a Rayvanes Realty Corp / RRC project.');
                         }
                     },
                 ]),
@@ -67,33 +67,33 @@ class TechnicalDescriptionImporter extends Importer
 
     protected function afterValidate(): void
     {
-        $project = Project::query()
-            ->where('code', (string) $this->data['project_code'])
+        $property = Property::query()
+            ->where('code', (string) $this->data['property_code'])
             ->first();
 
-        if (! $project) {
+        if (! $property) {
             return;
         }
 
-        $companyName = TechnicalDescriptionResource::getRayvanesCompanyName($project);
+        $companyName = TechnicalDescriptionResource::getRayvanesCompanyName($property);
 
         if (strcasecmp(trim((string) $this->data['company_name']), trim((string) $companyName)) === 0) {
             return;
         }
 
         throw ValidationException::withMessages([
-            'company_name' => 'Company Name must match the selected Project Code company name.',
+            'company_name' => 'Company Name must match the selected Property Code company name.',
         ]);
     }
 
     protected function beforeSave(): void
     {
-        $project = Project::query()
-            ->where('code', (string) $this->data['project_code'])
+        $property = Property::query()
+            ->where('code', (string) $this->data['property_code'])
             ->first();
 
-        if ($project) {
-            $this->record->company_name = TechnicalDescriptionResource::getRayvanesCompanyName($project);
+        if ($property) {
+            $this->record->company_name = TechnicalDescriptionResource::getRayvanesCompanyName($property);
         }
     }
 

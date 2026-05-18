@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('technical_descriptions', function (Blueprint $table) {
             $table->id();
-            $table->string('project_code')->unique();
+            $table->string('property_code')->unique();
             $table->string('company_name');
             $table->string('registry_of_deeds');
             $table->string('tct');
