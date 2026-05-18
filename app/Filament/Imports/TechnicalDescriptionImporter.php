@@ -8,6 +8,7 @@ use App\Models\TechnicalDescription;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -78,11 +79,36 @@ class TechnicalDescriptionImporter extends Importer
         $companyName = TechnicalDescriptionResource::getRayvanesCompanyName($property);
 
         if (strcasecmp(trim((string) $this->data['company_name']), trim((string) $companyName)) === 0) {
+            $this->ensurePropertyCodeIsUniqueInImport();
+
             return;
         }
 
         throw ValidationException::withMessages([
             'company_name' => 'Company Name must match the selected Property Code company name.',
+        ]);
+    }
+
+    protected function ensurePropertyCodeIsUniqueInImport(): void
+    {
+        $propertyCode = trim((string) ($this->data['property_code'] ?? ''));
+
+        if ($propertyCode === '') {
+            return;
+        }
+
+        $cacheKey = sprintf(
+            'technical-description-import:%s:property-code:%s',
+            $this->import->getKey(),
+            hash('sha256', strtolower($propertyCode)),
+        );
+
+        if (Cache::add($cacheKey, true, now()->addDay())) {
+            return;
+        }
+
+        throw ValidationException::withMessages([
+            'property_code' => 'Property Code is duplicated in the uploaded file.',
         ]);
     }
 
@@ -95,6 +121,16 @@ class TechnicalDescriptionImporter extends Importer
         if ($property) {
             $this->record->company_name = TechnicalDescriptionResource::getRayvanesCompanyName($property);
         }
+    }
+
+    public function getJobConnection(): ?string
+    {
+        return 'sync';
+    }
+
+    public static function getCompletedNotificationTitle(Import $import): string
+    {
+        return 'Technical description import completed';
     }
 
     public static function getCompletedNotificationBody(Import $import): string
