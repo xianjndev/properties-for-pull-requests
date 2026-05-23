@@ -25,19 +25,40 @@ class ManageProjects extends ManageRecords
                         'location'=>$data['location'],
                     ]);
                     $project->meta->set('address', $data['address']);
-                    $project->meta->set('type', $data['type']);
                     $project->meta->set('housingType', $data['housingType']);
                     $project->meta->set('licenseNumber', $data['licenseNumber']);
-                    $project->meta->set('licenseDate', $data['licenseDate']);
+                    $project->meta->set('license_date', $data['license_date']);
                     $project->meta->set('company_code', $data['company_code']);
                     $project->meta->set('appraised_lot_value', $data['appraised_lot_value']);
-                    $project->meta->set('appraised__lot_value', $data['appraised_lot_value']);
+                    $project->meta->set('total_sold', $data['total_sold']);
+                    $project->meta->set('lts', (bool) ($data['lts'] ?? false));
+                    $project->meta->set('company_name', $data['company_name']);
+                    $project->meta->set('company_tin', $data['company_tin']);
+                    $project->meta->set('company_address', $data['company_address']);
+                    $project->meta->set('pagibig_filing_site', $data['pagibig_filing_site']);
+                    $project->meta->set('exec_position', $data['exec_position']);
+                    $project->meta->set('exec_signatory', $data['exec_signatory']);
+                    $project->meta->set('exec_tin', $data['exec_tin']);
+                    $project->meta->set('board_resolution_date', $data['board_resolution_date']);
+                    $project->meta->set('type', $data['type']);
+                    $project->meta->set('licenseDate', $data['licenseDate']);
+                    $project->meta->set('project_description', $data['project_description']);
+                    $project->meta->set('filing_site', $data['filing_site']);
+                    
                     $project->save();
 
                     return $project;
                 }),
             Actions\ImportAction::make()
+                ->hidden(auth()->user()?->cannot('import_projects'))
                 ->importer(ProjectsImporter::class)
+        ];
+    }
+
+    protected function getFooterWidgets(): array
+    {
+        return [
+            \Coolsam\NestedComments\Filament\Widgets\CommentsWidget::class,
         ];
     }
 }

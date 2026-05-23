@@ -13,5 +13,5 @@ Route::get('update_property_status/{property_code}/{status}/{transaction_id}',\A
     ->name('update_property_status');
 
 //Route::get('fetch-properties', \App\Http\Controllers\FetchPropertiesController::class)->name('fetch-properties');
-Route::get('fetch-products', \App\Http\Controllers\FetchProductsController::class)->name('fetch-products');
-Route::get('fetch-projects', \App\Http\Controllers\FetchProjectsController::class)->name('fetch-projects');
+// Route::get('fetch-products', \App\Http\Controllers\FetchProductsController::class)->name('fetch-products');
+// Route::get('fetch-projects', \App\Http\Controllers\FetchProjectsController::class)->name('fetch-projects');

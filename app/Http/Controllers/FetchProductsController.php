@@ -12,7 +12,7 @@ class FetchProductsController extends Controller
     {
         $products = Product::withMeta(['phased_out' => false])->get();
 
-        return FetchData::from(compact('products'))
+        return FetchData::from(compact('products'));
 //            ->only(
 //                'products.sku',
 //                'products.name',
@@ -24,6 +24,5 @@ class FetchProductsController extends Controller
 //                'products.down_payment_term',
 //                'products.percent_miscellaneous_fees',
 //            )
-            ;
     }
 }

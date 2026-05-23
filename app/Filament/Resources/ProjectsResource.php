@@ -18,10 +18,11 @@ use Homeful\Property\Enums\HousingType;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Homeful\Properties\Models\Project;
+use App\Models\Project;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
 use Illuminate\Support\Carbon;
 
-class ProjectsResource extends Resource
+class ProjectsResource extends Resource implements HasShieldPermissions
 {
     protected static ?string $model = Project::class;
 
@@ -32,75 +33,131 @@ class ProjectsResource extends Resource
         return static::getModel()::count();
     }
 
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'restore',
+            'restore_any',
+            'replicate',
+            'reorder',
+            'delete',
+            'delete_any',
+            'force_delete',
+            'force_delete_any',
+            'import',
+        ];
+    }
+
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->unique('projects', 'name',ignoreRecord: true)
-                    ->required()
-                    ->maxLength(255),
                 TextInput::make('code')
                     ->unique('projects', 'code',ignoreRecord: true)
                     ->required()
+                    ->columnSpan(3)
+                    ->maxLength(255),
+                TextInput::make('name')
+                    ->unique('projects', 'name',ignoreRecord: true)
+                    ->required()
+                    ->columnSpan(4)
                     ->maxLength(255),
                 TextInput::make('location')
                     ->required()
-                    ->maxLength(255),
-                TextInput::make('address')
-                    ->required()
+                    ->columnSpan(5)
                     ->maxLength(255),
                 Forms\Components\Select::make('type')
                     ->required()
+                    ->columnSpan(3)
                     ->options(collect(MarketSegment::cases())->mapWithKeys(fn($cs) => [$cs->name => $cs->name])->toArray())
                     ->native(false),
                 Forms\Components\Select::make('housingType')
                     ->required()
+                    ->columnSpan(3)
                     ->options(collect(HousingType::cases())->mapWithKeys(fn($cs) => [$cs->name => $cs->name])->toArray())
                     ->native(false),
+                TextInput::make('address')
+                    ->required()
+                    ->columnSpan(6),
                 TextInput::make('licenseNumber')
                     ->required()
-                    ->maxLength(255),
-                DatePicker::make('licenseDate')
-                    ->required(),
-                TextInput::make('company_name')
+                    ->columnSpan(3),
+                DatePicker::make('license_date')
                     ->required()
-                    ->maxLength(255),
+                    ->columnSpan(3),
                 TextInput::make('company_code')
                     ->required()
-                    ->maxLength(255),
-                TextInput::make('company_tin')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('company_address')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('pagibig_filing_site')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('filing_site')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('exec_position')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('exec_signatory')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('exec_tin')
-                    ->required()
-                    ->maxLength(255),
-                DatePicker::make('board_resolution_date')
-                    ->required(),
+                    ->columnSpan(3),
                 TextInput::make('appraised_lot_value')
                     ->numeric()
-                    ->required(),
+                    ->required()
+                    ->columnSpan(3),
                 TextInput::make('total_sold')
+                    ->required()
                     ->numeric()
-                    ->required(),
+                    ->columnSpan(3),
+                Forms\Components\Select::make('lts')
+                    ->label('LTS')
+                    ->options([
+                        true => 'Yes',
+                        false => 'No',
+                    ])
+                    ->native(false)
+                    ->default(false)
+                    ->columnSpan(3),
+                TextInput::make('company_name')
+                    ->required()
+                    ->columnSpan(6),
+                TextInput::make('company_tin')
+                    ->required()
+                    ->columnSpan(3),
+                TextInput::make('company_address')
+                    ->required()
+                    ->columnSpan(3),
+                TextInput::make('pagibig_filing_site')
+                    ->required()
+                    ->columnSpan(3),
+                TextInput::make('exec_position')
+                    ->required()
+                    ->columnSpan(3),
+                TextInput::make('exec_signatory')
+                    ->required()
+                    ->columnSpan(3),
+                TextInput::make('exec_tin')
+                    ->required()
+                    ->columnSpan(3),
+                DatePicker::make('board_resolution_date')
+                    ->required()
+                    ->columnSpan(3),
+                DatePicker::make('licenseDate')
+                    ->required()
+                    ->columnSpan(3),
+                TextInput::make('filing_site')
+                    ->required()
+                    ->columnSpan(3),
                 Textarea::make('project_description')
+                    ->required()
                     ->columnSpanFull(),
-            ]);
+                Forms\Components\Livewire::make(
+                    'nested-comments::comments',
+                    fn (?Model $record) => [
+                        'record' => $record,
+                    ]
+                )->hiddenOn('create')
+                    ->key(fn (?Model $record) => 'comments-' . now())
+                    ->columnSpanFull(),
+                Forms\Components\Livewire::make('update-logs-table')
+                    ->hiddenOn('create')
+                    ->key(fn ($get, $record) => 'update-logs-' . now())
+                    ->columnSpanFull(),
+
+                
+            ])
+            ->columns(12);
     }
 
     public static function table(Table $table): Table
@@ -260,7 +317,7 @@ class ProjectsResource extends Resource
                             ->where('meta->exec_tin', 'like', "%{$search}%");
                     }),
                 TextColumn::make('board_resolution_date')
-                    ->getStateUsing(fn ($record) =>Carbon::parse($record->board_resolution_date)->format('Y-m-d') )
+                    ->getStateUsing(fn ($record) => $record->meta->board_resolution_date)
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query
                             ->orderBy('meta->board_resolution_date', $direction);
@@ -281,6 +338,10 @@ class ProjectsResource extends Resource
                     }),
                 TextColumn::make('total_sold')
                     ->formatStateUsing(fn ($record) => $record->meta->total_sold),
+                TextColumn::make('lts')
+                    ->label('LTS')
+                    ->getStateUsing(fn ($record) => (bool) $record->meta->get('lts'))
+                    ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No'),
                 TextColumn::make('project_description')
                     ->formatStateUsing(fn ($record) => $record->meta->project_description)
                     ->words(15),
@@ -291,25 +352,59 @@ class ProjectsResource extends Resource
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->mutateRecordDataUsing(function (array $data,Model $record): array {
-                        $data['address']=$record->meta->get('address');
-                        $data['type']=$record->meta->get('type');
-                        $data['housingType']=$record->meta->get('housingType');
-                        $data['licenseNumber']=$record->meta->get('licenseNumber');
-                        $data['licenseDate']=$record->meta->get('licenseDate');
-                        $data['company_name']=$record->meta->get('company_name');
-                        $data['company_code']=$record->meta->get('company_code');
-                        $data['company_tin']=$record->meta->get('company_tin');
-                        $data['company_address']=$record->meta->get('company_address');
-                        $data['pagibig_filing_site']=$record->meta->get('pagibig_filing_site');
-                        $data['filing_site']=$record->meta->get('filing_site');
-                        $data['exec_position']=$record->meta->get('exec_position');
-                        $data['exec_signatory']=$record->meta->get('exec_signatory');
-                        $data['exec_tin']=$record->meta->get('exec_tin');
-                        $data['board_resolution_date']=$record->meta->get('board_resolution_date');
-                        $data['appraised_lot_value']=$record->meta->get('appraised_lot_value');
-                        $data['total_sold']=$record->meta->get('total_sold');
-                        $data['project_description']=$record->meta->get('project_description');
+                        $data['address'] = $record->meta->get('address');
+                        $data['housingType'] = $record->meta->get('housingType');
+                        $data['licenseNumber'] = $record->meta->get('licenseNumber');
+                        $data['license_date'] = $record->meta->get('license_date');
+                        $data['company_code'] = $record->meta->get('company_code');
+                        $data['appraised_lot_value'] = $record->meta->get('appraised_lot_value');
+                        $data['appraised__lot_value'] = $record->meta->get('appraised__lot_value');
+                        $data['total_sold'] = $record->meta->get('total_sold');
+                        $data['lts'] = (bool) $record->meta->get('lts');
+                        $data['company_name'] = $record->meta->get('company_name');
+                        $data['company_tin'] = $record->meta->get('company_tin');
+                        $data['company_address'] = $record->meta->get('company_address');
+                        $data['pagibig_filing_site'] = $record->meta->get('pagibig_filing_site');
+                        $data['exec_position'] = $record->meta->get('exec_position');
+                        $data['exec_signatory'] = $record->meta->get('exec_signatory');
+                        $data['exec_tin'] = $record->meta->get('exec_tin');
+                        $data['board_resolution_date'] = $record->meta->get('board_resolution_date');
+                        $data['type'] = $record->meta->get('type');
+                        $data['licenseDate'] = $record->meta->get('licenseDate');
+                        $data['project_description'] = $record->meta->get('project_description');
+                        $data['filing_site'] = $record->meta->get('filing_site');
                         return $data;
+                    })
+                    ->using(function (Model $record, array $data): Model {
+                        $record->update([
+                            'name' => $data['name'],
+                            'code'=>$data['code'],
+                            'location'=>$data['location'],
+                        ]);
+                        $record->meta->set('address', $data['address']);
+                        $record->meta->set('housingType', $data['housingType']);
+                        $record->meta->set('licenseNumber', $data['licenseNumber']);
+                        $record->meta->set('license_date', Carbon::parse($data['license_date'])->format('Y-m-d') ?? $data['license_date']);
+                        $record->meta->set('company_code', $data['company_code']);
+                        $record->meta->set('appraised_lot_value', $data['appraised_lot_value']);
+                        $record->meta->set('total_sold', $data['total_sold']);
+                        $record->meta->set('lts', (bool) ($data['lts'] ?? false));
+                        $record->meta->set('company_name', $data['company_name']);
+                        $record->meta->set('company_tin', $data['company_tin']);
+                        $record->meta->set('company_address', $data['company_address']);
+                        $record->meta->set('pagibig_filing_site', $data['pagibig_filing_site']);
+                        $record->meta->set('exec_position', $data['exec_position']);
+                        $record->meta->set('exec_signatory', $data['exec_signatory']);
+                        $record->meta->set('exec_tin', $data['exec_tin']);
+                        $record->meta->set('board_resolution_date', Carbon::parse($data['board_resolution_date'])->format('Y-m-d') ?? $data['board_resolution_date']);
+                        $record->meta->set('type', $data['type']);
+                        $record->meta->set('licenseDate', Carbon::parse($data['licenseDate'])->format('Y-m-d') ?? $data['licenseDate']);
+                        $record->meta->set('project_description', $data['project_description']);
+                        $record->meta->set('filing_site', $data['filing_site']);
+
+                        $record->save();
+
+                        return $record;
                     }),
                 Tables\Actions\DeleteAction::make(),
             ])
