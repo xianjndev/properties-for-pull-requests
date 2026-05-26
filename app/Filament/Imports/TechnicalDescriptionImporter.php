@@ -2,15 +2,10 @@
 
 namespace App\Filament\Imports;
 
-use App\Filament\Resources\TechnicalDescriptionResource;
-use App\Models\Property;
 use App\Models\TechnicalDescription;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class TechnicalDescriptionImporter extends Importer
 {
@@ -26,13 +21,6 @@ class TechnicalDescriptionImporter extends Importer
                     'required',
                     'string',
                     'max:255',
-                    Rule::exists('properties', 'code'),
-                    Rule::unique('technical_descriptions', 'property_code'),
-                    fn () => function (string $attribute, mixed $value, \Closure $fail): void {
-                        if (! TechnicalDescriptionResource::isRayvanesPropertyCode((string) $value)) {
-                            $fail('Property Code must belong to a Rayvanes Realty Corp / RRC project.');
-                        }
-                    },
                 ]),
             ImportColumn::make('company_name')
                 ->label('Company Name')
@@ -54,73 +42,71 @@ class TechnicalDescriptionImporter extends Importer
                 ->label('VSR')
                 ->requiredMapping()
                 ->rules(['required', 'string', 'max:255']),
-            ImportColumn::make('technical_description')
-                ->label('Technical Description')
+            ImportColumn::make('survey_plan_no')
+                ->label('Survey Plan No.')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('block_no')
+                ->label('Block No.')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('lot_no')
+                ->label('Lot No.')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('portion_of_lot')
+                ->label('Portion of Lot')
                 ->requiredMapping()
                 ->rules(['required', 'string']),
+            ImportColumn::make('lrc_record_no')
+                ->label('LRC Record No.')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('land_owner_claimant')
+                ->label('Land Owner/Claimant')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('location')
+                ->label('Location')
+                ->requiredMapping()
+                ->rules(['required', 'string']),
+            ImportColumn::make('area')
+                ->label('Area')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('description_of_corners')
+                ->label('Description of Corners')
+                ->requiredMapping()
+                ->rules(['required', 'string']),
+            ImportColumn::make('bearings')
+                ->label('Bearings')
+                ->boolean()
+                ->requiredMapping()
+                ->rules(['required', 'boolean']),
+            ImportColumn::make('original_date_of_survey')
+                ->label('Original Date of Survey')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('date_of_survey')
+                ->label('Date of Survey')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('date_approved')
+                ->label('Date Approved')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('geodetic_engineer')
+                ->label('Geodetic Engineer')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
         ];
     }
 
     public function resolveRecord(): ?TechnicalDescription
     {
-        return new TechnicalDescription();
-    }
-
-    protected function afterValidate(): void
-    {
-        $property = Property::query()
-            ->where('code', (string) $this->data['property_code'])
-            ->first();
-
-        if (! $property) {
-            return;
-        }
-
-        $companyName = TechnicalDescriptionResource::getRayvanesCompanyName($property);
-
-        if (strcasecmp(trim((string) $this->data['company_name']), trim((string) $companyName)) === 0) {
-            $this->ensurePropertyCodeIsUniqueInImport();
-
-            return;
-        }
-
-        throw ValidationException::withMessages([
-            'company_name' => 'Company Name must match the selected Property Code company name.',
+        return TechnicalDescription::firstOrNew([
+            'property_code' => (string) $this->data['property_code'],
         ]);
-    }
-
-    protected function ensurePropertyCodeIsUniqueInImport(): void
-    {
-        $propertyCode = trim((string) ($this->data['property_code'] ?? ''));
-
-        if ($propertyCode === '') {
-            return;
-        }
-
-        $cacheKey = sprintf(
-            'technical-description-import:%s:property-code:%s',
-            $this->import->getKey(),
-            hash('sha256', strtolower($propertyCode)),
-        );
-
-        if (Cache::add($cacheKey, true, now()->addDay())) {
-            return;
-        }
-
-        throw ValidationException::withMessages([
-            'property_code' => 'Property Code is duplicated in the uploaded file.',
-        ]);
-    }
-
-    protected function beforeSave(): void
-    {
-        $property = Property::query()
-            ->where('code', (string) $this->data['property_code'])
-            ->first();
-
-        if ($property) {
-            $this->record->company_name = TechnicalDescriptionResource::getRayvanesCompanyName($property);
-        }
     }
 
     public function getJobConnection(): ?string
