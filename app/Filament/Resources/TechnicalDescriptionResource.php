@@ -12,6 +12,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Validation\Rule;
 
 class TechnicalDescriptionResource extends Resource implements HasShieldPermissions
 {
@@ -49,23 +50,13 @@ class TechnicalDescriptionResource extends Resource implements HasShieldPermissi
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('property_code')
+                Forms\Components\TextInput::make('property_code')
                     ->label('Property Code')
-                    ->options(fn (): array => Property::query()
-                        ->orderBy('code')
-                        ->get()
-                        ->filter(fn (Property $property): bool => self::isRayvanesProperty($property))
-                        ->mapWithKeys(fn (Property $property): array => [$property->code => $property->code])
-                        ->toArray())
-                    ->searchable()
                     ->required()
+                    ->maxLength(255)
                     ->unique(ignoreRecord: true)
                     ->rules([
-                        fn () => function (string $attribute, mixed $value, \Closure $fail): void {
-                            if (! self::isRayvanesPropertyCode((string) $value)) {
-                                $fail('Technical descriptions may only be created for Rayvanes Realty Corp / RRC properties.');
-                            }
-                        },
+                        Rule::exists('properties', 'code'),
                     ])
                     ->live()
                     ->afterStateUpdated(function (Forms\Set $set, ?string $state): void {
@@ -73,14 +64,12 @@ class TechnicalDescriptionResource extends Resource implements HasShieldPermissi
                             ->where('code', $state)
                             ->first();
 
-                        $set('company_name', self::getRayvanesCompanyName($property));
+                        $set('company_name', self::getPropertyCompanyName($property));
                     })
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('company_name')
                     ->label('Company Name')
                     ->required()
-                    ->disabled()
-                    ->dehydrated()
                     ->maxLength(255)
                     ->columnSpan(3),
                 Forms\Components\TextInput::make('registry_of_deeds')
@@ -98,11 +87,75 @@ class TechnicalDescriptionResource extends Resource implements HasShieldPermissi
                     ->required()
                     ->maxLength(255)
                     ->columnSpan(3),
-                Forms\Components\Textarea::make('technical_description')
-                    ->label('Technical Description')
+                Forms\Components\TextInput::make('survey_plan_no')
+                    ->label('Survey Plan No.')
                     ->required()
-                    ->columnSpanFull()
-                    ->rows(10),
+                    ->maxLength(255)
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('block_no')
+                    ->label('Block No.')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('lot_no')
+                    ->label('Lot No.')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('lrc_record_no')
+                    ->label('LRC Record No.')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('land_owner_claimant')
+                    ->label('Land Owner/Claimant')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnSpan(6),
+                Forms\Components\TextInput::make('area')
+                    ->label('Area')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnSpan(6),
+                Forms\Components\Textarea::make('portion_of_lot')
+                    ->label('Portion of Lot')
+                    ->required()
+                    ->rows(4)
+                    ->columnSpanFull(),
+                Forms\Components\Textarea::make('location')
+                    ->label('Location')
+                    ->required()
+                    ->rows(3)
+                    ->columnSpanFull(),
+                Forms\Components\Textarea::make('description_of_corners')
+                    ->label('Description of Corners')
+                    ->required()
+                    ->rows(3)
+                    ->columnSpanFull(),
+                Forms\Components\Toggle::make('bearings')
+                    ->label('Bearings')
+                    ->required()
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('original_date_of_survey')
+                    ->label('Original Date of Survey')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('date_of_survey')
+                    ->label('Date of Survey')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('date_approved')
+                    ->label('Date Approved')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnSpan(3),
+                Forms\Components\TextInput::make('geodetic_engineer')
+                    ->label('Geodetic Engineer')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnSpan(6),
             ])
             ->columns(12);
     }
@@ -133,10 +186,61 @@ class TechnicalDescriptionResource extends Resource implements HasShieldPermissi
                     ->label('VSR')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('technical_description')
-                    ->label('Technical Description')
+                TextColumn::make('survey_plan_no')
+                    ->label('Survey Plan No.')
                     ->searchable()
-                    ->words(15),
+                    ->sortable(),
+                TextColumn::make('block_no')
+                    ->label('Block No.')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('lot_no')
+                    ->label('Lot No.')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('land_owner_claimant')
+                    ->label('Land Owner/Claimant')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('location')
+                    ->label('Location')
+                    ->searchable()
+                    ->words(8),
+                TextColumn::make('area')
+                    ->label('Area')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('geodetic_engineer')
+                    ->label('Geodetic Engineer')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('portion_of_lot')
+                    ->label('Portion of Lot')
+                    ->searchable()
+                    ->words(15)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('description_of_corners')
+                    ->label('Description of Corners')
+                    ->searchable()
+                    ->words(15)
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('bearings')
+                    ->label('Bearings')
+                    ->badge()
+                    ->formatStateUsing(fn (mixed $state): string => $state ? 'True' : 'False')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('original_date_of_survey')
+                    ->label('Original Date of Survey')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('date_of_survey')
+                    ->label('Date of Survey')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('date_approved')
+                    ->label('Date Approved')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -167,32 +271,7 @@ class TechnicalDescriptionResource extends Resource implements HasShieldPermissi
         ];
     }
 
-    public static function isRayvanesPropertyCode(string $propertyCode): bool
-    {
-        $property = Property::query()
-            ->where('code', $propertyCode)
-            ->first();
-
-        if (! $property) {
-            return false;
-        }
-
-        return self::isRayvanesProperty($property);
-    }
-
-    public static function isRayvanesProperty(Property $property): bool
-    {
-        $project = $property->project;
-
-        if (! $project) {
-            return false;
-        }
-
-        return strcasecmp(trim((string) $project->company_code), 'RRC') === 0
-            || strcasecmp(trim((string) $project->company_name), 'Rayvanes Realty Corp') === 0;
-    }
-
-    public static function getRayvanesCompanyName(?Property $property): ?string
+    public static function getPropertyCompanyName(?Property $property): ?string
     {
         $project = $property?->project;
 
@@ -200,6 +279,6 @@ class TechnicalDescriptionResource extends Resource implements HasShieldPermissi
             return null;
         }
 
-        return $project->company_name ?: 'Rayvanes Realty Corp';
+        return $project->company_name;
     }
 }
