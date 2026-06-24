@@ -8,16 +8,33 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class TechnicalDescription extends Model
 {
     protected $fillable = [
-        'project_code',
+        'property_code',
         'company_name',
         'registry_of_deeds',
         'tct',
         'vsr',
-        'technical_description',
+        'survey_plan_no',
+        'block_no',
+        'lot_no',
+        'portion_of_lot',
+        'lrc_record_no',
+        'land_owner_claimant',
+        'location',
+        'area',
+        'description_of_corners',
+        'bearings',
+        'original_date_of_survey',
+        'date_of_survey',
+        'date_approved',
+        'geodetic_engineer',
     ];
 
-    public function project(): BelongsTo
+    protected $casts = [
+        'bearings' => 'boolean',
+    ];
+
+    public function property(): BelongsTo
     {
-        return $this->belongsTo(Project::class, 'project_code', 'code');
+        return $this->belongsTo(Property::class, 'property_code', 'code');
     }
 }
