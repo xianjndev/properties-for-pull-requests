@@ -13,6 +13,7 @@ class TechnicalDescription extends Model
         'registry_of_deeds',
         'tct',
         'vsr',
+        'old_technical_desc',
         'survey_plan_no',
         'block_no',
         'lot_no',

@@ -156,6 +156,10 @@ class TechnicalDescriptionResource extends Resource implements HasShieldPermissi
                     ->required()
                     ->maxLength(255)
                     ->columnSpan(6),
+                Forms\Components\Textarea::make('old_technical_desc')
+                    ->label('Old Technical Description')
+                    ->rows(6)
+                    ->columnSpanFull(),
             ])
             ->columns(12);
     }
@@ -248,6 +252,11 @@ class TechnicalDescriptionResource extends Resource implements HasShieldPermissi
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('old_technical_desc')
+                    ->label('Old Technical Description')
+                    ->searchable()
+                    ->words(15)
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([

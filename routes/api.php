@@ -1,8 +1,15 @@
 <?php
 
-use App\Http\Controllers\{ApiController, GetNextPropertyDetailController, GetProductByProjectController, GetProductDetailController, GetProjectDetailController, GetPropertyDetailController, GetTechnicalDescriptionController};
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ApiController;
+use App\Http\Controllers\GetNextPropertyDetailController;
+use App\Http\Controllers\GetProductByProjectController;
+use App\Http\Controllers\GetProductDetailController;
+use App\Http\Controllers\GetProjectDetailController;
+use App\Http\Controllers\GetPropertyDetailController;
+use App\Http\Controllers\GetTechnicalDescriptionController;
+use App\Http\Controllers\UpsertTechnicalDescriptionController;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -28,6 +35,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('technical-descriptions/{property_code}', GetTechnicalDescriptionController::class)
         ->name('technical-description-details');
+
+    Route::post('technical-descriptions/{property_code}', UpsertTechnicalDescriptionController::class)
+        ->name('technical-description-create');
+
+    Route::match(['put', 'patch'], 'technical-descriptions/{property_code}', UpsertTechnicalDescriptionController::class)
+        ->name('technical-description-update');
 
     Route::get('products/by-project/{project_code}', GetProductByProjectController::class)
         ->name('product-by-project');

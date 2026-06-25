@@ -15,6 +15,7 @@ class TechnicalDescriptionResource extends JsonResource
             'registry_of_deeds' => $this->registry_of_deeds,
             'tct' => $this->tct,
             'vsr' => $this->vsr,
+            'old_technical_desc' => $this->old_technical_desc,
             'survey_plan_no' => $this->survey_plan_no,
             'block_no' => $this->block_no,
             'lot_no' => $this->lot_no,

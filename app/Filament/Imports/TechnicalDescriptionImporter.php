@@ -99,6 +99,10 @@ class TechnicalDescriptionImporter extends Importer
                 ->label('Geodetic Engineer')
                 ->requiredMapping()
                 ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('old_technical_desc')
+                ->label('Old Technical Description')
+                ->guess(['old_technical_desc', 'property_code_desc'])
+                ->rules(['nullable', 'string']),
         ];
     }
 
@@ -121,10 +125,10 @@ class TechnicalDescriptionImporter extends Importer
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your technical descriptions import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'Your technical descriptions import has completed and '.number_format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' '.number_format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 
         return $body;
