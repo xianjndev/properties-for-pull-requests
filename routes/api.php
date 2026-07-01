@@ -34,12 +34,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
         ->name('project-details');
 
     Route::get('technical-descriptions/{property_code}', GetTechnicalDescriptionController::class)
+        ->middleware('throttle:60,1')
         ->name('technical-description-details');
 
     Route::post('technical-descriptions/{property_code}', UpsertTechnicalDescriptionController::class)
+        ->middleware('throttle:30,1')
         ->name('technical-description-create');
 
     Route::match(['put', 'patch'], 'technical-descriptions/{property_code}', UpsertTechnicalDescriptionController::class)
+        ->middleware('throttle:30,1')
         ->name('technical-description-update');
 
     Route::get('products/by-project/{project_code}', GetProductByProjectController::class)
