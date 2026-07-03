@@ -29,6 +29,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('technical-descriptions/{project_code}', GetTechnicalDescriptionController::class)
         ->name('technical-description-details');
 
-    Route::get('products/by-project/{project_code}', GetProductByProjectController::class)
+    Route::get('product/by-project/{project_code}', GetProductByProjectController::class)
         ->name('product-by-project');
 });
