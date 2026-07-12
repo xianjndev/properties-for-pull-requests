@@ -2,14 +2,10 @@
 
 namespace App\Filament\Imports;
 
-use App\Filament\Resources\TechnicalDescriptionResource;
-use App\Models\Project;
 use App\Models\TechnicalDescription;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class TechnicalDescriptionImporter extends Importer
 {
@@ -18,20 +14,13 @@ class TechnicalDescriptionImporter extends Importer
     public static function getColumns(): array
     {
         return [
-            ImportColumn::make('project_code')
-                ->label('Project Code')
+            ImportColumn::make('property_code')
+                ->label('Property Code')
                 ->requiredMapping()
                 ->rules([
                     'required',
                     'string',
                     'max:255',
-                    Rule::exists('projects', 'code'),
-                    Rule::unique('technical_descriptions', 'project_code'),
-                    fn () => function (string $attribute, mixed $value, \Closure $fail): void {
-                        if (! TechnicalDescriptionResource::isRayvanesProjectCode((string) $value)) {
-                            $fail('Project Code must belong to Rayvanes Realty Corp / RRC.');
-                        }
-                    },
                 ]),
             ImportColumn::make('company_name')
                 ->label('Company Name')
@@ -53,56 +42,93 @@ class TechnicalDescriptionImporter extends Importer
                 ->label('VSR')
                 ->requiredMapping()
                 ->rules(['required', 'string', 'max:255']),
-            ImportColumn::make('technical_description')
-                ->label('Technical Description')
+            ImportColumn::make('survey_plan_no')
+                ->label('Survey Plan No.')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('block_no')
+                ->label('Block No.')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('lot_no')
+                ->label('Lot No.')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('portion_of_lot')
+                ->label('Portion of Lot')
                 ->requiredMapping()
                 ->rules(['required', 'string']),
+            ImportColumn::make('lrc_record_no')
+                ->label('LRC Record No.')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('land_owner_claimant')
+                ->label('Land Owner/Claimant')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('location')
+                ->label('Location')
+                ->requiredMapping()
+                ->rules(['required', 'string']),
+            ImportColumn::make('area')
+                ->label('Area')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('description_of_corners')
+                ->label('Description of Corners')
+                ->requiredMapping()
+                ->rules(['required', 'string']),
+            ImportColumn::make('bearings')
+                ->label('Bearings')
+                ->boolean()
+                ->requiredMapping()
+                ->rules(['required', 'boolean']),
+            ImportColumn::make('original_date_of_survey')
+                ->label('Original Date of Survey')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('date_of_survey')
+                ->label('Date of Survey')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('date_approved')
+                ->label('Date Approved')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('geodetic_engineer')
+                ->label('Geodetic Engineer')
+                ->requiredMapping()
+                ->rules(['required', 'string', 'max:255']),
+            ImportColumn::make('old_technical_desc')
+                ->label('Old Technical Description')
+                ->guess(['old_technical_desc', 'property_code_desc'])
+                ->rules(['nullable', 'string']),
         ];
     }
 
     public function resolveRecord(): ?TechnicalDescription
     {
-        return new TechnicalDescription();
-    }
-
-    protected function afterValidate(): void
-    {
-        $project = Project::query()
-            ->where('code', (string) $this->data['project_code'])
-            ->first();
-
-        if (! $project) {
-            return;
-        }
-
-        $companyName = TechnicalDescriptionResource::getRayvanesCompanyName($project);
-
-        if (strcasecmp(trim((string) $this->data['company_name']), trim((string) $companyName)) === 0) {
-            return;
-        }
-
-        throw ValidationException::withMessages([
-            'company_name' => 'Company Name must match the selected Project Code company name.',
+        return TechnicalDescription::firstOrNew([
+            'property_code' => (string) $this->data['property_code'],
         ]);
     }
 
-    protected function beforeSave(): void
+    public function getJobConnection(): ?string
     {
-        $project = Project::query()
-            ->where('code', (string) $this->data['project_code'])
-            ->first();
+        return 'sync';
+    }
 
-        if ($project) {
-            $this->record->company_name = TechnicalDescriptionResource::getRayvanesCompanyName($project);
-        }
+    public static function getCompletedNotificationTitle(Import $import): string
+    {
+        return 'Technical description import completed';
     }
 
     public static function getCompletedNotificationBody(Import $import): string
     {
-        $body = 'Your technical descriptions import has completed and ' . number_format($import->successful_rows) . ' ' . str('row')->plural($import->successful_rows) . ' imported.';
+        $body = 'Your technical descriptions import has completed and '.number_format($import->successful_rows).' '.str('row')->plural($import->successful_rows).' imported.';
 
         if ($failedRowsCount = $import->getFailedRowsCount()) {
-            $body .= ' ' . number_format($failedRowsCount) . ' ' . str('row')->plural($failedRowsCount) . ' failed to import.';
+            $body .= ' '.number_format($failedRowsCount).' '.str('row')->plural($failedRowsCount).' failed to import.';
         }
 
         return $body;
