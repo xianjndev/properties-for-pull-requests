@@ -43,6 +43,7 @@ class TechnicalDescriptionResource extends Resource implements HasShieldPermissi
             'force_delete',
             'force_delete_any',
             'import',
+            'export',
         ];
     }
 

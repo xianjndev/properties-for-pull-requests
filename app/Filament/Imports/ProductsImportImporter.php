@@ -29,6 +29,10 @@ class ProductsImportImporter extends Importer
             ImportColumn::make('sku')
                 ->label('SKU')
                 ->rules(['max:255']),
+            ImportColumn::make('brand')
+                ->rules(['max:255']),
+            ImportColumn::make('category')
+                ->rules(['max:255']),
 //            ImportColumn::make('market_segment')
 //                ->label('Market Segement')
 //                ->rules(['max:255']),
@@ -42,10 +46,30 @@ class ProductsImportImporter extends Importer
                 ->numeric(),
             ImportColumn::make('lot_area')
                 ->numeric(),
-            ImportColumn::make('building')
-                ->rules(['max:255']),
+            // ImportColumn::make('building')
+            //     ->rules(['max:255']),
             ImportColumn::make('unit_type')
                 ->rules(['max:255']),
+            ImportColumn::make('unit_type_interior')
+                ->ignoreBlankState()
+                ->rules(['nullable', 'string', 'max:255']),
+            ImportColumn::make('house_color')
+                ->ignoreBlankState()
+                ->rules(['nullable', 'string', 'max:255']),
+            ImportColumn::make('bedrooms')
+                ->integer()
+                ->ignoreBlankState(),
+            ImportColumn::make('parking_slots')
+                ->guess(['parking'])
+                ->integer()
+                ->ignoreBlankState(),
+            ImportColumn::make('toilets_and_bathrooms')
+                ->guess(['toilet_and_bathrooms'])
+                ->integer()
+                ->ignoreBlankState(),
+            ImportColumn::make('carports')
+                ->integer()
+                ->ignoreBlankState(),
             ImportColumn::make('project_code')
                 ->rules(['max:255']),
             ImportColumn::make('project_location')
@@ -53,6 +77,8 @@ class ProductsImportImporter extends Importer
             ImportColumn::make('project_address'),
 
             ImportColumn::make('price')
+                ->numeric(),
+            ImportColumn::make('processing_fee')
                 ->numeric(),
             ImportColumn::make('tcp')
                 ->numeric(),
@@ -65,9 +91,10 @@ class ProductsImportImporter extends Importer
             ImportColumn::make('status_code'),
             ImportColumn::make('key_location'),
             ImportColumn::make('destinations'),
+            ImportColumn::make('directions'),
             ImportColumn::make('amenities'),
             ImportColumn::make('facade_url'),
-            ImportColumn::make('project_description'),
+            ImportColumn::make('description'),
             ImportColumn::make('digital_assets'),
         ];
     }
@@ -94,8 +121,8 @@ class ProductsImportImporter extends Importer
                 'brand' => (string) ($this->data['brand'] ?? ''),
                 'category' => (string) ($this->data['category'] ?? ''),
                 'description' => (string) ($this->data['description'] ?? ''),
-                'price' => (float) ($this->data['tcp'] ?? 0),
-                'location' => (string) ($this->data['location'] ?? ''),
+                'price' => (float) ($this->data['price'] ?? 0),
+                // 'location' => (string) ($this->data['location'] ?? ''),
                 'directions' => (string) ($this->data['directions'] ?? ''),
                 'amenities' => (string) ($this->data['amenities'] ?? ''),
                 'facade_url' => (string) ($facadeUrl ?? ''),
@@ -109,8 +136,10 @@ class ProductsImportImporter extends Importer
 //        $product->save();
 
         $product->facade_url= $facadeUrl ?? '';
+        $product->processing_fee = (float) ($this->data['processing_fee'] ?? 0);
         $product->status_code= $this->data['status_code'] ?? '';
         $product->destinations= $this->data['destinations'] ?? '';
+        $product->directions = $this->data['directions'] ?? '';
         $product->amenities= $this->data['amenities'] ?? '';
         $product->key_location= $this->data['key_location'] ?? '';
         $product->percent_down_payment=(float) ($this->data['percent_dp'] ?? 0);
@@ -141,11 +170,33 @@ class ProductsImportImporter extends Importer
                 'tcp' => (float) ($this->data['tcp'] ?? 0),
             ]
         );
-        $property->unit_type_interior=(string) ($this->data['unit_type_interior'] ?? '');
+        if (filled($this->data['unit_type_interior'] ?? null)) {
+            $property->unit_type_interior = $this->data['unit_type_interior'];
+        }
+
+        if (filled($this->data['house_color'] ?? null)) {
+            $property->house_color = $this->data['house_color'];
+        }
+
+        if (filled($this->data['bedrooms'] ?? null)) {
+            $property->bedrooms = $this->data['bedrooms'];
+        }
+
+        if (filled($this->data['parking_slots'] ?? null)) {
+            $property->parking_slots = $this->data['parking_slots'];
+        }
+
+        if (filled($this->data['toilets_and_bathrooms'] ?? null)) {
+            $property->toilets_and_bathrooms = $this->data['toilets_and_bathrooms'];
+        }
+
+        if (filled($this->data['carports'] ?? null)) {
+            $property->carports = $this->data['carports'];
+        }
 
         $project = $property->project;
         if ($project) {
-            $project->project_description = (string) ($this->data['project_description'] ?? '');
+            $project->project_description = (string) ($this->data['description'] ?? '');
             $project->save();
         }
 
@@ -164,8 +215,8 @@ class ProductsImportImporter extends Importer
                 'brand' => (string) ($this->data['brand'] ?? ''),
                 'category' => (string) ($this->data['category'] ?? ''),
                 'description' => (string) ($this->data['description'] ?? ''),
-                'price' => (float) ($this->data['tcp'] ?? 0),
-                'location' => (string) ($this->data['location'] ?? ''),
+                'price' => (float) ($this->data['price'] ?? 0),
+                // 'location' => (string) ($this->data['location'] ?? ''),
                 'directions' => (string) ($this->data['directions'] ?? ''),
                 'amenities' => (string) ($this->data['amenities'] ?? ''),
                 'facade_url' => (string) ($facadeUrl ?? ''),
@@ -173,8 +224,10 @@ class ProductsImportImporter extends Importer
             ]
         );
         $product->facade_url= $facadeUrl ?? '';
+        $product->processing_fee = (float) ($this->data['processing_fee'] ?? 0);
         $product->status_code= $this->data['status_code'] ?? '';
         $product->destinations= $this->data['destinations'] ?? '';
+        $product->directions = $this->data['directions'] ?? '';
         $product->amenities= $this->data['amenities'] ?? '';
         $product->key_location= $this->data['key_location'] ?? '';
         $product->percent_down_payment=(float) ($this->data['percent_dp'] ?? 0);
@@ -215,16 +268,33 @@ class ProductsImportImporter extends Importer
         $this->record->project_location=(string) ($this->data['project_location'] ?? '');
         $this->record->project_address=(string) ($this->data['project_address'] ?? '');
 
-        $this->record->bedrooms=(integer) ($this->data['bedrooms'] ?? 0);
-        $this->record->toilets_and_bathrooms=(integer) ($this->data['toilet_and_bathrooms'] ?? 0);
-        $this->record->parking_slots=(integer) ($this->data['parking'] ?? 0);
-        $this->record->carports=(integer) ($this->data['carports'] ?? 0);
+        if (filled($this->data['house_color'] ?? null)) {
+            $this->record->house_color = $this->data['house_color'];
+        }
 
-        $this->record->unit_type_interior=(string) ($this->data['unit_type_interior'] ?? '');
+        if (filled($this->data['bedrooms'] ?? null)) {
+            $this->record->bedrooms = $this->data['bedrooms'];
+        }
+
+        if (filled($this->data['toilets_and_bathrooms'] ?? null)) {
+            $this->record->toilets_and_bathrooms = $this->data['toilets_and_bathrooms'];
+        }
+
+        if (filled($this->data['parking_slots'] ?? null)) {
+            $this->record->parking_slots = $this->data['parking_slots'];
+        }
+
+        if (filled($this->data['carports'] ?? null)) {
+            $this->record->carports = $this->data['carports'];
+        }
+
+        if (filled($this->data['unit_type_interior'] ?? null)) {
+            $this->record->unit_type_interior = $this->data['unit_type_interior'];
+        }
         $this->record->product()->associate($product);
         $project = $this->record->project;
         if ($project) {
-            $project->project_description = (string) ($this->data['project_description'] ?? '');
+            $project->project_description = (string) ($this->data['description'] ?? '');
             $project->save();
         }
         $this->record->save();

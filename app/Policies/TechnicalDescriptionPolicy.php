@@ -74,4 +74,9 @@ class TechnicalDescriptionPolicy
     {
         return $user->can('import_technical::description');
     }
+
+    public function export(User $user): bool
+    {
+        return $user->can('export_technical::description');
+    }
 }
