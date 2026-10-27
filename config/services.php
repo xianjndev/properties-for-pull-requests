@@ -28,6 +28,16 @@ return [
         'key' => env('RESEND_KEY'),
     ],
 
+    'mfiles' => [
+        'sync_inventories_url' => env('MFILES_SYNC_INVENTORIES_URL'),
+        'token' => env('MFILES_TOKEN'),
+    ],
+
+    'match' => [
+        'mfiles_technical_description_api_logs_url' => env('MATCH_MFILES_TECHNICAL_DESCRIPTION_API_LOGS_URL'),
+        'token' => env('MATCH_API_TOKEN'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

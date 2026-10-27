@@ -7,6 +7,7 @@ use App\Http\Controllers\GetProductDetailController;
 use App\Http\Controllers\GetProjectDetailController;
 use App\Http\Controllers\GetPropertyDetailController;
 use App\Http\Controllers\GetTechnicalDescriptionController;
+use App\Http\Controllers\UpdateTechnicalDescriptionSyncProgressController;
 use App\Http\Controllers\UpsertTechnicalDescriptionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -44,6 +45,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::match(['put', 'patch'], 'technical-descriptions/{property_code}', UpsertTechnicalDescriptionController::class)
         ->middleware('throttle:30,1')
         ->name('technical-description-update');
+
+    Route::post('technical-description-sync-progress', UpdateTechnicalDescriptionSyncProgressController::class)
+        ->name('technical-description-sync-progress');
 
     Route::get('products/by-project/{project_code}', GetProductByProjectController::class)
         ->name('product-by-project');
