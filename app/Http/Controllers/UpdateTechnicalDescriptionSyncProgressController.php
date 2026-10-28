@@ -29,6 +29,13 @@ class UpdateTechnicalDescriptionSyncProgressController extends Controller
             'The technical description sync request is no longer active.',
         );
 
+        if ($syncRun->status === 'queued') {
+            $syncRun->forceFill([
+                'status' => 'running',
+                'started_at' => $syncRun->started_at ?? now(),
+            ])->save();
+        }
+
         $log = TechnicalDescriptionSyncLog::firstOrNew([
             'sync_run_id' => $syncRun->getKey(),
             'property_code' => $validated['property_code'],

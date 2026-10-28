@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\CompleteTechnicalDescriptionSyncController;
 use App\Http\Controllers\GetNextPropertyDetailController;
 use App\Http\Controllers\GetProductByProjectController;
 use App\Http\Controllers\GetProductDetailController;
@@ -48,6 +49,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('technical-description-sync-progress', UpdateTechnicalDescriptionSyncProgressController::class)
         ->name('technical-description-sync-progress');
+
+    Route::post('technical-description-sync-complete', CompleteTechnicalDescriptionSyncController::class)
+        ->name('technical-description-sync-complete');
 
     Route::get('products/by-project/{project_code}', GetProductByProjectController::class)
         ->name('product-by-project');
