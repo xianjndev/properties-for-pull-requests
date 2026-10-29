@@ -93,7 +93,7 @@ class CompleteTechnicalDescriptionSyncController extends Controller
                 'reported_success_count' => $validated['success'],
                 'reported_failed_count' => $validated['failed'],
                 'result_reconciled' => $reconciled,
-                'error_message' => $message,
+                'error_message' => $status === 'completed' ? null : $message,
                 'summary' => $validated,
                 'finished_at' => now(),
             ])->save();
