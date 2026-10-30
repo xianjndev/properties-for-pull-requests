@@ -49,6 +49,15 @@ class ItemsRelationManager extends RelationManager
                 Tables\Columns\TextColumn::make('error_message')->limit(60)->placeholder('None'),
                 Tables\Columns\TextColumn::make('updated_at')->label('Last Update')->since()->dateTimeTooltip(),
             ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')->options([
+                    'pending' => 'Pending',
+                    'processing' => 'Processing',
+                    'created' => 'Created',
+                    'updated' => 'Updated',
+                    'failed' => 'Failed',
+                ]),
+            ])
             ->actions([Tables\Actions\ViewAction::make()]);
     }
 }
