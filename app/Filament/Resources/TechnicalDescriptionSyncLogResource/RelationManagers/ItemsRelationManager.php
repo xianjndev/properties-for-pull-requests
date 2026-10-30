@@ -52,7 +52,6 @@ class ItemsRelationManager extends RelationManager
             ->filters([
                 Tables\Filters\SelectFilter::make('status')->options([
                     'pending' => 'Pending',
-                    'processing' => 'Processing',
                     'created' => 'Created',
                     'updated' => 'Updated',
                     'failed' => 'Failed',
