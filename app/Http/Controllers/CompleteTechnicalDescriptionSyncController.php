@@ -134,6 +134,7 @@ class CompleteTechnicalDescriptionSyncController extends Controller
 
             Log::info('M-Files inventory sync completion recorded.', [
                 'sync_request_id' => $syncRequestId,
+                'mfiles_result' => $validated,
                 ...$result['response'],
             ]);
         }

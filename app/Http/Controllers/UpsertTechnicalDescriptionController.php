@@ -79,29 +79,33 @@ class UpsertTechnicalDescriptionController extends Controller
 
             $hasUsableBearings = false;
 
-            // if ($request->has('bearings')) {
-            //     $rawBearings = $request->input('bearings');
+            if ($request->has('bearings')) {
+                $rawBearings = $request->input('bearings');
+                $isPlaceholder = $rawBearings === null
+                    || (is_string($rawBearings) && in_array(trim($rawBearings), ['', '-'], true));
 
-            //     // M-Files represents an empty bearing value as null, an empty string, or "-".
-            //     // The Properties field is boolean, so these placeholders are treated as false.
-            //     if ($rawBearings === null || (is_string($rawBearings) && in_array(trim($rawBearings), ['', '-'], true))) {
-            //         $request->merge(['bearings' => false]);
-            //     } else {
-            //         // Normalize values such as "TRUE" and "FALSE", which Laravel's boolean
-            //         // validation rule does not accept in every string representation.
-            //         $normalizedBearings = filter_var(
-            //             $rawBearings,
-            //             FILTER_VALIDATE_BOOLEAN,
-            //             FILTER_NULL_ON_FAILURE,
-            //         );
+                if ($isPlaceholder) {
+                    // A placeholder must not clear an existing true value. New records
+                    // still need a valid boolean because bearings is required on create.
+                    if ($technicalDescription === null) {
+                        $request->merge(['bearings' => false]);
+                    } else {
+                        $request->request->remove('bearings');
+                    }
+                } else {
+                    $normalizedBearings = filter_var(
+                        $rawBearings,
+                        FILTER_VALIDATE_BOOLEAN,
+                        FILTER_NULL_ON_FAILURE,
+                    );
 
-            //         // Leave unrecognized values unchanged so validation rejects bad source data.
-            //         if ($normalizedBearings !== null) {
-            //             $request->merge(['bearings' => $normalizedBearings]);
-            //             $hasUsableBearings = true;
-            //         }
-            //     }
-            // }
+                    // Leave unrecognized values unchanged so boolean validation rejects them.
+                    if ($normalizedBearings !== null) {
+                        $request->merge(['bearings' => $normalizedBearings]);
+                        $hasUsableBearings = true;
+                    }
+                }
+            }
 
             // If no technical description exists for the property code, require all fields so a new record can be created.
             $requiredRule = $technicalDescription ? 'sometimes' : 'required';

@@ -4,10 +4,13 @@ namespace App\Filament\Resources\TechnicalDescriptionResource\Pages;
 
 use App\Filament\Imports\TechnicalDescriptionImporter;
 use App\Filament\Resources\TechnicalDescriptionResource;
+use App\Models\Property;
 use App\Models\TechnicalDescriptionSyncRun;
 use App\Services\MFilesApiLogger;
 use Filament\Actions;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRecords;
 use Illuminate\Http\Client\RequestException;
@@ -15,6 +18,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ManageTechnicalDescriptions extends ManageRecords
 {
@@ -31,12 +36,12 @@ class ManageTechnicalDescriptions extends ManageRecords
                     && auth()->user()?->can('update_technical::description') === true)
                 ->requiresConfirmation()
                 ->modalHeading('Sync inventories from M-Files?')
-                ->modalDescription('Enter either a project code or a property code. M-Files will update the matching technical descriptions and record each changed field in the sync logs.')
+                ->modalDescription('Enter a project code, a property code, or upload a CSV containing selected property codes. Use only one option.')
                 ->modalSubmitActionLabel('Sync Inventories')
                 ->form([
                     TextInput::make('projectCode')
                         ->label('Project Code')
-                        ->helperText('Enter a project code or a property code below, but not both.')
+                        ->helperText('Enter a project code, a property code below, or upload a CSV. Use only one option.')
                         ->maxLength(255)
                         ->rules([
                             'nullable',
@@ -46,12 +51,12 @@ class ManageTechnicalDescriptions extends ManageRecords
                         ->validationMessages([
                             'exists' => 'This is not a valid project code. If this is a property code, enter it in the Property Code field.',
                         ])
-                        ->requiredWithout('propertyCode')
-                        ->prohibits('propertyCode')
+                        ->requiredWithoutAll(['propertyCode', 'propertyCodesCsv'])
+                        ->prohibits(['propertyCode', 'propertyCodesCsv'])
                         ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? trim($state) : null),
                     TextInput::make('propertyCode')
                         ->label('Property Code')
-                        ->helperText('Enter a property code only when Project Code is empty.')
+                        ->helperText('Enter a property code only when Project Code and CSV are empty.')
                         ->maxLength(255)
                         ->rules([
                             'nullable',
@@ -61,26 +66,55 @@ class ManageTechnicalDescriptions extends ManageRecords
                         ->validationMessages([
                             'exists' => 'This is not a valid property code. If this is a project code, enter it in the Project Code field.',
                         ])
-                        ->requiredWithout('projectCode')
-                        ->prohibits('projectCode')
+                        ->requiredWithoutAll(['projectCode', 'propertyCodesCsv'])
+                        ->prohibits(['projectCode', 'propertyCodesCsv'])
                         ->dehydrateStateUsing(fn (?string $state): ?string => filled($state) ? trim($state) : null),
+                    FileUpload::make('propertyCodesCsv')
+                        ->label('Selected Property Codes CSV')
+                        ->helperText('Upload a CSV with a property_code, property code, or code header. A headerless single-column CSV is also accepted.')
+                        ->acceptedFileTypes(['text/csv', 'text/plain', 'application/csv', 'application/vnd.ms-excel'])
+                        ->maxSize(2048)
+                        ->storeFiles(false)
+                        ->requiredWithoutAll(['projectCode', 'propertyCode'])
+                        ->prohibits(['projectCode', 'propertyCode']),
                 ])
-                ->action(function (array $data): void {
+                ->action(function (array $data, Form $form): void {
                     $syncRequestId = (string) Str::uuid();
+                    $propertyCodes = isset($data['propertyCodesCsv'])
+                        ? $this->validatedPropertyCodesFromCsv(
+                            $data['propertyCodesCsv'],
+                            $form->getStatePath().'.propertyCodesCsv',
+                        )
+                        : [];
                     $filters = array_filter([
                         'projectCode' => $data['projectCode'] ?? null,
                         'propertyCode' => $data['propertyCode'] ?? null,
+                        'propertyCodes' => $propertyCodes,
                     ], filled(...));
 
                     Log::info('M-Files inventory sync requested.', [
                         'sync_request_id' => $syncRequestId,
                         'url' => config('services.mfiles.sync_inventories_url'),
-                        'filters' => $filters,
+                        'filters' => $propertyCodes === [] ? $filters : [
+                            'selected_property_count' => count($propertyCodes),
+                            'sample_property_codes' => array_slice($propertyCodes, 0, 10),
+                        ],
                         'user_id' => auth()->id(),
                     ]);
 
-                    $filterType = isset($filters['propertyCode']) ? 'property_code' : 'project_code';
-                    $filterValue = $filters['propertyCode'] ?? $filters['projectCode'];
+                    if ($propertyCodes !== []) {
+                        $hashCodes = $propertyCodes;
+                        sort($hashCodes);
+                        $filterType = 'selected_property_codes';
+                        $filterValue = sprintf(
+                            'CSV: %d properties [%s]',
+                            count($propertyCodes),
+                            substr(hash('sha256', implode("\n", $hashCodes)), 0, 12),
+                        );
+                    } else {
+                        $filterType = isset($filters['propertyCode']) ? 'property_code' : 'project_code';
+                        $filterValue = $filters['propertyCode'] ?? $filters['projectCode'];
+                    }
 
                     $activeRun = TechnicalDescriptionSyncRun::query()
                         ->where('filter_type', $filterType)
@@ -190,5 +224,87 @@ class ManageTechnicalDescriptions extends ManageRecords
             Actions\ImportAction::make()
                 ->importer(TechnicalDescriptionImporter::class),
         ];
+    }
+
+    private function validatedPropertyCodesFromCsv(mixed $upload, string $validationKey): array
+    {
+        if (! $upload instanceof TemporaryUploadedFile) {
+            throw ValidationException::withMessages([
+                $validationKey => 'Please upload a valid CSV file.',
+            ]);
+        }
+
+        $file = new \SplFileObject($upload->getRealPath());
+        $file->setFlags(\SplFileObject::READ_CSV | \SplFileObject::SKIP_EMPTY | \SplFileObject::DROP_NEW_LINE);
+
+        $normalize = fn (mixed $value): string => str((string) $value)
+            ->replace("\xEF\xBB\xBF", '')
+            ->trim()
+            ->toString();
+        $propertyCodes = [];
+        $columnIndex = 0;
+
+        foreach ($file as $rowNumber => $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+            if ($rowNumber === 0) {
+                $headers = array_map(
+                    fn (mixed $value): string => str($normalize($value))
+                        ->lower()
+                        ->replace([' ', '-'], '_')
+                        ->toString(),
+                    $row,
+                );
+                $headerIndex = collect($headers)->search(
+                    fn (string $header): bool => in_array($header, ['property_code', 'propertycode', 'code'], true),
+                );
+
+                if ($headerIndex !== false) {
+                    $columnIndex = (int) $headerIndex;
+
+                    continue;
+                }
+            }
+
+            $propertyCode = $normalize($row[$columnIndex] ?? '');
+
+            if ($propertyCode !== '') {
+                $propertyCodes[] = $propertyCode;
+            }
+        }
+
+        $propertyCodes = array_values(array_unique($propertyCodes));
+
+        if ($propertyCodes === []) {
+            throw ValidationException::withMessages([
+                $validationKey => 'The CSV must contain at least one property code.',
+            ]);
+        }
+
+        if (count($propertyCodes) > 5000) {
+            throw ValidationException::withMessages([
+                $validationKey => 'The CSV may contain at most 5,000 unique property codes.',
+            ]);
+        }
+
+        $existingCodes = Property::query()
+            ->whereIn('code', $propertyCodes)
+            ->pluck('code')
+            ->map(fn (mixed $code): string => (string) $code)
+            ->all();
+        $invalidCodes = array_values(array_diff($propertyCodes, $existingCodes));
+
+        if ($invalidCodes !== []) {
+            $sample = implode(', ', array_slice($invalidCodes, 0, 10));
+            $remaining = count($invalidCodes) - min(10, count($invalidCodes));
+
+            throw ValidationException::withMessages([
+                $validationKey => 'Unknown property codes: '.$sample.($remaining > 0 ? " and {$remaining} more." : '.'),
+            ]);
+        }
+
+        return $propertyCodes;
     }
 }
